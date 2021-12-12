@@ -9,7 +9,7 @@ class ADFPopulation(BasePopulation):
         self.genotypes_dict = {}
         for i in range(self.pop_size):
             adf_id = ADF_FREFIX + str(i)
-            self.adfs_dict[adf_id] = ADF()
+            self.adfs_dict[adf_id] = ADF(1, 2)
             self.genotypes_dict[adf_id] = self.adfs_dict[adf_id].genotype
         self.keys_list = list(self.genotypes_dict.keys())
         self.population = list(self.adfs_dict.values())

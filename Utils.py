@@ -1,17 +1,10 @@
-import numpy as np
-import torch
+
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-import torchvision.transforms as transforms
-import torchvision
-import copy
 from Configs import *
 
 def get_detail_conv(conv_term):
     array = conv_term.split("_")
     return array[0], array[1]
-
 
 def conv_block (conv_term, in_channel, out_channel):
     modules = [nn.ReLU()]
@@ -159,14 +152,6 @@ def build_tree_cell(genotype, adfs_genotype_dict):
     calculate_channel_mul(root)
     root = expand_tree_cell(root, adfs_genotype_dict)
     return root
-
-test_dict = {
-    "adf1": ["sum", "dep_3x3", "sep_3x3"],
-    "adf2": ["sum", PREV_OUTPUT, "sep_3x3"],
-    "adf3": ["dep_3x3", "isep_3x3", PREV_OUTPUT],
-    "adf4": ["sum", "sep_3x3", "isep_3x3"]
-}
-
 
 def view_tree(t):
     t_level = [t]

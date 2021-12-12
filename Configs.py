@@ -19,10 +19,10 @@ INPUT_CHANNELS = 3
 # CIFAR-10 3->16->...
 NUM_CHANNELS = 16
 
-STEM_KERNEL_SIZE = (3,3)
+STEM_KERNEL_SIZE = (3, 3)
 STEM_TERM = "stem_3x3"
-POINT_WISE_TERM = "point_1x1"
-POINT_WISE_BEFORE_REDUCTION_TERM = "pwbr_1x1"
+POINT_WISE_TERM = "point_1x1"  # for lowering channel
+POINT_WISE_BEFORE_REDUCTION_TERM = "pwbr_1x1"  # for reduction
 PREV_OUTPUT = "prev_output"
 ADF_FREFIX = "adf"
 CELL_PREFIX = "cell"

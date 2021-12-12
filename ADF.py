@@ -6,7 +6,7 @@ from Utils import *
 class ADF(nn.Module):
     def __init__(self, adf_head=1, adf_tail=2, reproduction_genotype = None):
         super(ADF, self).__init__()
-        if reproduction_genotype is not None:
+        if reproduction_genotype is None:
             self.genotype = self.init_data(adf_head, adf_tail)
         else:
             self.genotype = reproduction_genotype

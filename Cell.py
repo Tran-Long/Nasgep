@@ -35,6 +35,17 @@ class Cell(nn.Module):
             adfs_dict[adf_genotype_key] = adf_population.adfs_dict[adf_genotype_key]
         return genotype, adfs_dict, adfs_genotype_dict
 
+    def create_modules_dict(self, base_channel, nonce=0):
+        module_dict = nn.ModuleDict()
+
+        return module_dict
+
+    def create_dict(self, root, value_dict, prev_outputs, nonce=0):
+        nonce = nonce + 1
+        if root.value == POINT_WISE_TERM:
+            conv_key = POINT_WISE_TERM + nonce
+            value_dict[conv_key] = conv_block(POINT_WISE_TERM, )
+
     def forward(self):
         self.fitness = abs(np.random.rand() + 7)
 
