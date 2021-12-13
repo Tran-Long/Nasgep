@@ -24,7 +24,7 @@ def conv_block (conv_term, in_channel, out_channel):
         padding_h = int((kernel_h-1)/2)
         padding_w = int((kernel_w-1)/2)
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2))
-    elif conv_type == "pw":
+    elif conv_type == "pwbr":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1), stride = int(out_channel/in_channel)))
     elif conv_type == "point":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1)))
@@ -150,6 +150,10 @@ def build_tree_cell(genotype, adfs_genotype_dict):
         this_level = next_level
 
     calculate_channel_mul(root)
+    if root.channel > 1:
+        new_root_pw = Node(POINT_WISE_TERM, channel = 1)
+        new_root_pw.left = root
+        root = new_root_pw
     root = expand_tree_cell(root, adfs_genotype_dict)
     return root
 

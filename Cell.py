@@ -4,7 +4,7 @@ from Configs import *
 from Utils import *
 
 class Cell(nn.Module):
-    def __init__(self, cell_head, cell_tail, adf_population, reproduction_genotype=None):
+    def __init__(self, cell_head, cell_tail, adf_population, reduction_cell=False, reproduction_genotype=None):
         if reproduction_genotype is not None:
             self.genotype = reproduction_genotype
             self.adfs_dict = {}
@@ -16,6 +16,8 @@ class Cell(nn.Module):
         else:
             self.genotype, self.adfs_dict, self.adfs_genotype_dict = self.init_data(cell_head, cell_tail, adf_population)
         self.root = build_tree_cell(self.genotype, self.adfs_genotype_dict)
+        if reduction_cell is True:
+            self.root = self.add_pwbr_for_reduction(self.root)
         self.mark_killed = False
         self.is_used = False
         self.fitness = -1
@@ -36,8 +38,8 @@ class Cell(nn.Module):
         return genotype, adfs_dict, adfs_genotype_dict
 
     def create_modules_dict(self, prev_outputs, base_channel, nonce=0):
-        module_dict = nn.ModuleDict()
-
+        value_dict, _ = self.create_dict(self.root, {}, prev_outputs, base_channel, nonce)
+        module_dict = nn.ModuleDict(value_dict)
         return module_dict
 
     def create_dict(self, root, value_dict, prev_outputs, base_channel, nonce):
@@ -46,6 +48,8 @@ class Cell(nn.Module):
         if root.value == POINT_WISE_TERM:
             value_dict[node_key] = conv_block(POINT_WISE_TERM, base_channel*root.left.channel, base_channel)
             value_dict, nonce = self.create_dict(root.left, value_dict, prev_outputs, base_channel, nonce)
+        elif root.value == POINT_WISE_BEFORE_REDUCTION_TERM:
+            value_dict[node_key] = conv_block(POINT_WISE_BEFORE_REDUCTION_TERM, int(base_channel/2), base_channel)
         elif root.value in CONV_TERMS:
             value_dict[node_key] = conv_block(root.value, base_channel, base_channel)
             value_dict, nonce = self.create_dict(root.left, value_dict, prev_outputs, base_channel, nonce)
@@ -61,6 +65,23 @@ class Cell(nn.Module):
         #     value_dict = {**self.create_dict(root.left, value_dict, prev_outputs, base_channel, nonce),
         #                   **self.create_dict(root.right, value_dict, prev_outputs, base_channel, nonce)}
         return value_dict, nonce
+
+    def add_pwbr_for_reduction(self, root):
+        if root.left is not None:
+            if root.left.value == PREV_OUTPUT:
+                temp = root.left
+                root.left = Node(POINT_WISE_BEFORE_REDUCTION_TERM)
+                root.left.left = temp
+            else:
+                root.left = self.add_pwbr_for_reduction(root.left)
+        if root.right is not None:
+            if root.right.value == PREV_OUTPUT:
+                temp = root.right
+                root.right = Node(POINT_WISE_BEFORE_REDUCTION_TERM)
+                root.right.left = temp
+            else:
+                root.right = self.add_pwbr_for_reduction(root.right)
+        return root
 
     def forward(self):
         self.fitness = abs(np.random.rand() + 7)
