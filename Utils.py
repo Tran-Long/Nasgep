@@ -19,11 +19,12 @@ def conv_block (conv_term, in_channel, out_channel):
     elif conv_type == "isep":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1)))
         modules.append(nn.Conv2d(out_channel, out_channel, kernel_size, padding = "same", groups = out_channel))
-    elif conv_type == "stem":
+    elif conv_type == "1stem":
         kernel_h, kernel_w = kernel_size
         padding_h = int((kernel_h-1)/2)
         padding_w = int((kernel_w-1)/2)
-        modules.append(nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2))
+        # modules.append(nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2))
+        modules = [nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2)]
     elif conv_type == "pwbr":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1), stride = int(out_channel/in_channel)))
     elif conv_type == "point":

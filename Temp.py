@@ -1,48 +1,65 @@
-if pop_type == "ADF":
-    self.adfs_dict = {}
-    self.genotypes_dict = {}
-    for i in range(pop_size):
-        adf_id = ADF_FREFIX + str(i)
-        self.adfs_dict[adf_id] = ADF()
-        self.genotypes_dict[adf_id] = self.adfs_dict[adf_id].genotype
-    self.keys_list = list(self.genotypes_dict.keys())
-    self.function_set = ADF_FUNCTION
-    self.terminal_set = ADF_TERMINAL
-elif pop_type == "CELL":
-    self.cells_dict = {}
-    self.cells_usage_dict = {}
-    for i in range(pop_size):
-        cell_id = CELL_PREFIX + str(i)
-        self.cells_dict[cell_id] = Cell(head_size, tail_size, adf_population)
-        self.cells_usage_dict[cell_id] = 0
-    self.function_set = CELL_FUNCTION
-    self.terminal_set = CELL_TERMINAL
-elif pop_type == "MODEL":
-    self.population = [Model() for i in range(self.pop_size)]
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import torchvision.transforms as transforms
+import torchvision
+from ADFPopulation import *
+from ReductionCellPopulation import *
+from Model import *
+from ADF import *
+from Cell import *
+from Utils import *
+from Configs import *
 
-    def killBadGene (self):
-        assert self.pop_type == "ADF"
-        t_population = []
-        for obj in self.population:
-            if obj.mark_killed == False:
-                t_population.append(obj)
-        self.population = t_population
+transform = transforms.Compose(
+    [transforms.ToTensor(),
+     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-    def survivorSelection (self):
-        assert self.pop_type == "CELL" or self.pop_type == "MODEL"
-        if self.pop_type == "MODEL":
-            max_age = max([obj.age for obj in self.population])
-            list_indices_max_age = []
-            for i, obj in enumerate(self.population):
-                if obj.age == max_age:
-                    list_indices_max_age.append(i)
-            random_oldest_index = np.random.choice(list_indices_max_age)
-            self.population[random_oldest_index].mark_killed = True
+batch_size = 4
 
-        new_generation = []
-        for obj in self.population:
-            if obj.mark_killed == False:
-                new_generation.append(obj)
-        self.population = new_generation
-        self.population.sort(key = lambda x: x.fitness, reverse = True)
-        # need fixing
+trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                        download=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
+                                          shuffle=True)
+
+testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                       download=True, transform=transform)
+testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
+                                         shuffle=False)
+
+classes = ('plane', 'car', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+
+adf_pop = ADFPopulation(1, 2, 10)
+r_cell_pop = ReductionCellPopulation(4, 5, 10, adf_pop)
+model = Model(adf_pop, r_cell_pop)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
+for epoch in range(2):  # loop over the dataset multiple times
+
+    running_loss = 0.0
+    for i, data in enumerate(trainloader, 0):
+        # get the inputs; data is a list of [inputs, labels]
+        inputs, labels = data
+
+        # zero the parameter gradients
+        optimizer.zero_grad()
+
+        # forward + backward + optimize
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+
+        # print statistics
+        running_loss += loss.item()
+        if i % 200 == 199:    # print every 2000 mini-batches
+            print('[%d, %5d] loss: %.3f' %
+                  (epoch + 1, i + 1, running_loss / 2000))
+            running_loss = 0.0
+
+print('Finished Training')

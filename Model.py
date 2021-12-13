@@ -1,4 +1,7 @@
+import copy
+
 import torch
+import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 from Configs import *
@@ -9,6 +12,7 @@ class Model(nn.Module):
     def __init__(self, adf_population, cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
                  normal_cell=None, reduction_cell=None, for_dataset="cifar-10"):
         super(Model, self).__init__()
+        self.all_module_block_list = nn.ModuleList()
         self.for_dataset = for_dataset
         self.n = n
         self.fitness = -1
@@ -22,42 +26,39 @@ class Model(nn.Module):
         else:
             self.normal_cell = normal_cell
             self.reduction_cell = reduction_cell
-        self.all_module_block_list = nn.ModuleList()
         # Init network representation
         current_input_channel = 3
         prev_outputs = []
         if for_dataset == "cifar-10":
+            self.n_cell_list = []
+            self.r_cell_list = []
             self.all_module_block_list.append(nn.ModuleList([conv_block(STEM_TERM, 3, NUM_CHANNELS)]))
             current_input_channel = 16
             prev_outputs.append(0)
 
             # 1st normal block => channel = 16
             for i in range(n):
-                self.all_module_block_list.append(self.normal_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
-                prev_outputs.append(0)
-                self.all_module_block_list.append(self.normal_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
-                prev_outputs.append(0)
-                self.all_module_block_list.append(self.normal_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
+                self.n_cell_list.append(copy.deepcopy(self.normal_cell))
+                self.all_module_block_list.append(self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
                 prev_outputs.append(0)
 
             for k in range(2):
                 current_input_channel *= 2
-                self.all_module_block_list.append(self.reduction_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
+                self.r_cell_list.append(copy.deepcopy(self.reduction_cell))
+                self.all_module_block_list.append(self.r_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
                 prev_outputs = [0]
                 for i in range(n):
-                    self.all_module_block_list.append(self.normal_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
-                    prev_outputs.append(0)
-                    self.all_module_block_list.append(self.normal_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
-                    prev_outputs.append(0)
-                    self.all_module_block_list.append(self.normal_cell.create_modules_dict(prev_outputs, current_input_channel, nonce = 0))
+                    self.n_cell_list.append(copy.deepcopy(self.normal_cell))
+                    self.all_module_block_list.append(self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
                     prev_outputs.append(0)
             self.all_module_block_list.append(nn.Linear(64, 10))
 
     def cell_forward(self, root, prev_outputs, module_dict, nonce=0):
         nonce += 1
-        node_key = root.value + str(nonce)
+        node_key = str(root.value) + str(nonce)
         if root.value == POINT_WISE_TERM or root.value == POINT_WISE_BEFORE_REDUCTION_TERM or root.value in CONV_TERMS:
-            output, nonce = module_dict[node_key](self.cell_forward(root.left, prev_outputs, module_dict, nonce))
+            output, nonce = self.cell_forward(root.left, prev_outputs, module_dict, nonce)
+            output = module_dict[node_key](output)
         elif root.value == "sum":
             left_value, nonce = self.cell_forward(root.left, prev_outputs, module_dict, nonce)
             right_value, nonce = self.cell_forward(root.right, prev_outputs, module_dict, nonce)
@@ -73,6 +74,8 @@ class Model(nn.Module):
     def forward(self, x):
         if self.for_dataset == "cifar-10":
             blk_idx = 0
+            n_cell_idx = 0
+            r_cell_idx = 0
             output = x
             prev_outputs = []
             for layer in self.all_module_block_list[blk_idx]:
@@ -82,22 +85,26 @@ class Model(nn.Module):
             for i in range(self.n):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
-                output, _ = self.cell_forward(self.normal_cell.root, prev_outputs, module_dict, nonce = 0)
+                output, _ = self.cell_forward(self.n_cell_list[n_cell_idx].root, prev_outputs, module_dict, nonce = 0)
+                n_cell_idx += 1
                 prev_outputs.append(output)
 
             for k in range(2):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
-                output, _ = self.cell_forward(self.reduction_cell.root, prev_outputs, module_dict, nonce = 0)
+                output, _ = self.cell_forward(self.r_cell_list[r_cell_idx].root, prev_outputs, module_dict, nonce = 0)
+                r_cell_idx += 1
                 prev_outputs = [output]
                 for i in range(self.n):
                     blk_idx += 1
                     module_dict = self.all_module_block_list[blk_idx]
-                    output, _ = self.cell_forward(self.normal_cell.root, prev_outputs, module_dict, nonce = 0)
+                    output, _ = self.cell_forward(self.n_cell_list[n_cell_idx].root, prev_outputs, module_dict, nonce = 0)
+                    n_cell_idx += 1
                     prev_outputs.append(output)
             output = torch.mean(output, dim = (2, 3))
             blk_idx += 1
-            output = self.all_module_block_list[blk_idx](x)
+            output = torch.flatten(output, 1)
+            output = F.relu(self.all_module_block_list[blk_idx](output))
             return output
 
 

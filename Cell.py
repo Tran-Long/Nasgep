@@ -3,7 +3,7 @@ import numpy as np
 from Configs import *
 from Utils import *
 
-class Cell(nn.Module):
+class Cell():
     def __init__(self, cell_head, cell_tail, adf_population, reduction_cell=False, reproduction_genotype=None):
         if reproduction_genotype is not None:
             self.genotype = reproduction_genotype
@@ -37,19 +37,20 @@ class Cell(nn.Module):
             adfs_dict[adf_genotype_key] = adf_population.adfs_dict[adf_genotype_key]
         return genotype, adfs_dict, adfs_genotype_dict
 
-    def create_modules_dict(self, prev_outputs, base_channel, nonce=0):
-        value_dict, _ = self.create_dict(self.root, {}, prev_outputs, base_channel, nonce)
+    def create_modules_dict(self, prev_outputs, base_channel):
+        value_dict, _ = self.create_dict(self.root, {}, prev_outputs, base_channel, nonce = 0)
         module_dict = nn.ModuleDict(value_dict)
         return module_dict
 
     def create_dict(self, root, value_dict, prev_outputs, base_channel, nonce):
         nonce = nonce + 1
-        node_key = root.value + str(nonce)
+        node_key = str(root.value) + str(nonce)
         if root.value == POINT_WISE_TERM:
             value_dict[node_key] = conv_block(POINT_WISE_TERM, base_channel*root.left.channel, base_channel)
             value_dict, nonce = self.create_dict(root.left, value_dict, prev_outputs, base_channel, nonce)
         elif root.value == POINT_WISE_BEFORE_REDUCTION_TERM:
             value_dict[node_key] = conv_block(POINT_WISE_BEFORE_REDUCTION_TERM, int(base_channel/2), base_channel)
+            value_dict, nonce = self.create_dict(root.left, value_dict, prev_outputs, base_channel, nonce)
         elif root.value in CONV_TERMS:
             value_dict[node_key] = conv_block(root.value, base_channel, base_channel)
             value_dict, nonce = self.create_dict(root.left, value_dict, prev_outputs, base_channel, nonce)
