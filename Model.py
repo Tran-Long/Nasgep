@@ -26,6 +26,7 @@ class Model(nn.Module):
         else:
             self.normal_cell = normal_cell
             self.reduction_cell = reduction_cell
+
         # Init network representation
         current_input_channel = 3
         prev_outputs = []

@@ -1,12 +1,14 @@
 import numpy as np
 import copy
-class BasePopulation():
+class BasePopulation:
     def __init__ (self, head_size, tail_size, pop_size):
-        self.nonce = 0
+        self.nonce = pop_size
         self.head_size = head_size
         self.tail_size = tail_size
         self.length = head_size + tail_size
         self.pop_size = pop_size
+        self.function_set = None
+        self.terminal_set = None
         self.population = []
         self.child_population = []
 
@@ -34,26 +36,28 @@ class BasePopulation():
                         winning[i] = 0
                 i += 2
             list_object_indices = list_object_indices[winning.astype(bool)]
-
-        return self.population[list_object_indices[0]], self.population[list_object_indices[1]]
+        obj1 = self.population[list_object_indices[0]]
+        obj2 = self.population[list_object_indices[1]]
+        if obj1.fitness >= obj2.fitness:
+            return obj1.genotype, obj2.genotype
+        return obj2.genotype, obj1.genotype
 
     def replication(self, obj):
         return copy.deepcopy(obj)
 
-    def mutation (self, obj, rate = 0.05):  # gene is an object - i.e Cell, ADF
+    def mutation (self, genotype, function_set, terminal_set, rate = 0.05):  # genotype == array of elements
         if np.random.rand() <= rate:
-            terminal_set = self.terminal_set
-            function_set = self.function_set
             mutation_pos = np.random.randint(self.length)
             if mutation_pos < self.head_size:
                 # head_set = terminal_set + function_set
                 head_set = function_set
-                obj.genotype[mutation_pos] = np.random.choice(head_set)
+                genotype[mutation_pos] = np.random.choice(head_set)
             else:
                 tail_set = terminal_set
-                obj.genotype[mutation_pos] = np.random.choice(tail_set)
+                genotype[mutation_pos] = np.random.choice(tail_set)
+        return genotype
 
-    def transposition (self, obj, rate = 0.1, is_elements_cnt = 3):
+    def transposition (self, genotype, rate = 0.1, is_elements_cnt = 3):
         if np.random.rand() <= rate:
             if self.head_size > 1:
                 # select start of transposon
@@ -72,13 +76,14 @@ class BasePopulation():
                             is_lengths.append(random_length)
                 transposon_length = np.random.choice(is_lengths)
                 # insert 
-                transposon = obj.genotype[is_start:is_start + transposon_length].copy()
+                transposon = genotype[is_start:is_start + transposon_length].copy()
                 for item in reversed(transposon):
-                    obj.genotype.insert(target_site, item)
+                    genotype.insert(target_site, item)
                 for i in range(transposon_length):
-                    obj.genotype.pop(self.head_size)
+                    genotype.pop(self.head_size)
+        return genotype
 
-    def rootTransposition (self, obj, rate = 0.1, ris_elements_cnt = 3):
+    def root_transposition (self, genotype, rate = 0.1, ris_elements_cnt = 3):
         if np.random.rand() <= rate:
             # find function / start of the transposon
             ris_start = None
@@ -102,29 +107,28 @@ class BasePopulation():
                             ris_lengths.append(random_length)
                 transposon_length = np.random.choice(ris_lengths)
                 # insert to the head
-                ris_element = obj.genotype[ris_start:ris_start + transposon_length].copy()
+                ris_element = genotype[ris_start:ris_start + transposon_length].copy()
                 for item in reversed(ris_element):
-                    obj.genotype.insert(0, item)
+                    genotype.insert(0, item)
                 for i in range(transposon_length):
-                    obj.genotype.pop(self.head_size)
+                    genotype.pop(self.head_size)
+        return genotype
 
-    def onePointRecombination (self, obj_dad, obj_mom, rate = 0.5):
+    def one_point_recombination (self, genotype_dad, genotype_mom, rate = 0.5):
         if np.random.rand() <= rate:
             random_point = np.random.randint(self.length) + 1
-            child1_genotype = copy.deepcopy(obj_dad.genotype)
-            child2_genotype = copy.deepcopy(obj_mom.genotype)
+            child1_genotype = copy.deepcopy(genotype_dad)
+            child2_genotype = copy.deepcopy(genotype_mom)
             for i in range(random_point):
-                child1_genotype[i] = obj_dad.genotype[i]
-                child2_genotype[i] = obj_mom.genotype[i]
+                child1_genotype[i] = genotype_dad[i]
+                child2_genotype[i] = genotype_mom[i]
             for i in range(random_point, self.length):
-                child2_genotype[i] = obj_dad.genotype[i]
-                child1_genotype[i] = obj_mom.genotype[i]
+                child2_genotype[i] = genotype_dad[i]
+                child1_genotype[i] = genotype_mom[i]
 
-            obj_dad.genotype = child1_genotype
-            obj_mom.genotype = child2_genotype
-        return obj_dad, obj_mom
+        return child1_genotype, child2_genotype
 
-    def twoPointRecombination (self, obj_dad, obj_mom, rate = 0.2):
+    def two_point_recombination (self, genotype_dad, genotype_mom, rate = 0.2):
         if np.random.rand() <= rate:
             random1 = np.random.randint(self.length) + 1
             random2 = np.random.randint(self.length) + 1
@@ -133,19 +137,38 @@ class BasePopulation():
             random_point1 = min(random1, random2)
             random_point2 = max(random1, random2)
 
-            child1_genotype = copy.deepcopy(obj_dad.genotype)
-            child2_genotype = copy.deepcopy(obj_mom.genotype)
+            child1_genotype = copy.deepcopy(genotype_dad)
+            child2_genotype = copy.deepcopy(genotype_mom)
             for i in range(random_point1):
-                child1_genotype[i] = obj_dad.genotype[i]
-                child2_genotype[i] = obj_mom.genotype[i]
+                child1_genotype[i] = genotype_dad[i]
+                child2_genotype[i] = genotype_mom[i]
             for i in range(random_point1, random_point2):
-                child2_genotype[i] = obj_dad.genotype[i]
-                child1_genotype[i] = obj_mom.genotype[i]
+                child2_genotype[i] = genotype_dad[i]
+                child1_genotype[i] = genotype_mom[i]
             for i in range(random_point2, self.length):
-                child1_genotype[i] = obj_dad.genotype[i]
-                child2_genotype[i] = obj_mom.genotype[i]
+                child1_genotype[i] = genotype_dad[i]
+                child2_genotype[i] = genotype_mom[i]
 
-            obj_dad.genotype = child1_genotype
-            obj_mom.genotype = child2_genotype
-        return obj_dad, obj_mom
+        return child1_genotype, child2_genotype
 
+    def reproduction_individual_genotype_lonely(self):
+        lonely_genotype, _ = self.tournament_selection()
+        lonely_genotype = self.replication(lonely_genotype)
+        lonely_genotype = self.mutation(lonely_genotype, self.function_set, self.terminal_set)
+        lonely_genotype = self.transposition(lonely_genotype)
+        lonely_genotype = self.root_transposition(lonely_genotype)
+        return lonely_genotype
+
+    def reproduction_individual_genotype(self):
+        genotype_mom, genotype_dad = self.tournament_selection()
+        genotype_mom = self.replication(genotype_mom)
+        genotype_dad = self.replication(genotype_dad)
+        genotype_mom = self.mutation(genotype_mom, self.function_set, self.terminal_set)
+        genotype_dad = self.mutation(genotype_dad, self.function_set, self.terminal_set)
+        genotype_mom = self.transposition(genotype_mom)
+        genotype_dad = self.transposition(genotype_dad)
+        genotype_mom = self.root_transposition(genotype_mom)
+        genotype_dad = self.root_transposition(genotype_dad)
+        genotype_mom, genotype_dad = self.one_point_recombination(genotype_dad, genotype_mom)
+        genotype_mom, genotype_dad = self.two_point_recombination(genotype_dad, genotype_mom)
+        return genotype_mom, genotype_dad

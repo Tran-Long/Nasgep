@@ -7,7 +7,8 @@ BEST_ACC_CONV = {conv: 0 for conv in CONV_TERMS}
 CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
 
 ADF_FUNCTION = ["sum", *CONV_TERMS]
-ADF_TERMINAL = ["prev_output", *CONV_TERMS]
+PREV_OUTPUT = "prev_output"
+ADF_TERMINAL = [PREV_OUTPUT, *CONV_TERMS]
 CELL_FUNCTION = ["sum", "cat"]
 CELL_TERMINAL = ["ADF"]
 
@@ -23,7 +24,12 @@ STEM_KERNEL_SIZE = (3, 3)
 STEM_TERM = "1stem_3x3"
 POINT_WISE_TERM = "point_1x1"  # for lowering channel
 POINT_WISE_BEFORE_REDUCTION_TERM = "pwbr_1x1"  # for reduction
-PREV_OUTPUT = "prev_output"
-ADF_FREFIX = "adf"
+ADF_PREFIX = "adf"
 CELL_PREFIX = "cell"
 NUM_OF_CONSECUTIVE_NORMAL_CELL = 3
+
+EPOCH_MAX = 10
+MIN_CHILD_ADF = 2
+MAX_CHILD_ADF = 10
+INIT_SIZE_ADF_POP = 50
+MAX_SIZE_ADF_POP = 100

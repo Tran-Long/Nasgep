@@ -3,16 +3,45 @@ from BasePopulation import *
 from Configs import *
 
 class ADFPopulation(BasePopulation):
-    def __init__(self, head_size, tail_size, pop_size):
+    def __init__(self, head_size, tail_size, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP):
         super(ADFPopulation, self).__init__(head_size, tail_size, pop_size)
         self.adfs_dict = {}
         self.genotypes_dict = {}
+        self.max_size = max_size
         for i in range(self.pop_size):
-            adf_id = ADF_FREFIX + str(i)
+            adf_id = ADF_PREFIX + str(i)
             self.adfs_dict[adf_id] = ADF(1, 2)
             self.genotypes_dict[adf_id] = self.adfs_dict[adf_id].genotype
         self.keys_list = list(self.genotypes_dict.keys())
         self.population = list(self.adfs_dict.values())
+        self.function_set = ADF_FUNCTION
+        self.terminal_set = ADF_TERMINAL
+
+    def kill_bad_genes(self):
+        pass
+
+    def add_adf(self, adf_genotype):
+        adf = ADF(reproduction_genotype = adf_genotype)
+        adf_key = ADF_PREFIX + str(self.nonce)
+        self.nonce += 1
+        self.adfs_dict[adf_key] = adf
+        self.genotypes_dict[adf_key] = adf_genotype
+        self.keys_list.append(adf_key)
+        self.population.append(adf)
+
+    def remove_adf(self, adf_key):
+        adf_index_in_list = self.keys_list.index(adf_key)
+        self.adfs_dict.pop(adf_key)
+        self.genotypes_dict.pop(adf_key)
+        self.keys_list.pop(adf_index_in_list)
+        self.population.pop(adf_index_in_list)
+
+    def reproduction(self, min_child, max_child):
+        num_of_new_adf = min(self.max_size - self.pop_size, MAX_CHILD_ADF)
+        assert num_of_new_adf >= MIN_CHILD_ADF, "Must create at least min = " + str(MIN_CHILD_ADF) + " child"
+        # for i in range(num_of_new_adf):
+        pass
+
 
 
 # from Utils import *
