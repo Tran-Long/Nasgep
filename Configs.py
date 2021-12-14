@@ -10,7 +10,7 @@ ADF_FUNCTION = ["sum", *CONV_TERMS]
 PREV_OUTPUT = "prev_output"
 ADF_TERMINAL = [PREV_OUTPUT, *CONV_TERMS]
 CELL_FUNCTION = ["sum", "cat"]
-CELL_TERMINAL = ["ADF"]
+# CELL_TERMINAL = ["ADF"]
 
 INPUT_CHANNELS = 3
 #
@@ -26,6 +26,7 @@ POINT_WISE_TERM = "point_1x1"  # for lowering channel
 POINT_WISE_BEFORE_REDUCTION_TERM = "pwbr_1x1"  # for reduction
 ADF_PREFIX = "adf"
 CELL_PREFIX = "cell"
+MODEL_PREFIX = "model"
 NUM_OF_CONSECUTIVE_NORMAL_CELL = 3
 
 EPOCH_MAX = 10

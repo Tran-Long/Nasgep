@@ -20,7 +20,7 @@ def init_data(cell_head, cell_tail, adf_population):
 
 
 class Cell:
-    def __init__(self, cell_head, cell_tail, adf_population, reduction_cell=False, reproduction_genotype=None):
+    def __init__(self, cell_head, cell_tail, adf_population, reduction_cell=True, reproduction_genotype=None):
         self.adf_population = adf_population
         if reproduction_genotype is not None:
             self.genotype = reproduction_genotype
@@ -81,6 +81,4 @@ class Cell:
                 root.right = self.add_pwbr_for_reduction(root.right)
         return root
 
-    def forward(self):
-        self.fitness = abs(np.random.rand() + 7)
 

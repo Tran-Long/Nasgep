@@ -12,6 +12,8 @@ class Model(nn.Module):
     def __init__(self, adf_population, cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
                  normal_cell=None, reduction_cell=None, for_dataset="cifar-10"):
         super(Model, self).__init__()
+        self.adf_population = adf_population
+        self.cell_population = cell_population
         self.all_module_block_list = nn.ModuleList()
         self.for_dataset = for_dataset
         self.n = n
@@ -22,11 +24,10 @@ class Model(nn.Module):
         # Select cells
         if normal_cell is None and reduction_cell is None:
             self.reduction_cell = cell_population.select_random_reduction_cell()
-            self.normal_cell = Cell(4, 5, adf_population)
+            self.normal_cell = Cell(4, 5, adf_population, reduction_cell = False)
         else:
             self.normal_cell = normal_cell
             self.reduction_cell = reduction_cell
-
         # Init network representation
         current_input_channel = 3
         prev_outputs = []
@@ -53,6 +54,11 @@ class Model(nn.Module):
                     self.all_module_block_list.append(self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
                     prev_outputs.append(0)
             self.all_module_block_list.append(nn.Linear(64, 10))
+
+        # Init optimizer and loss
+        self.optimizer = torch.optim.SGD(self.parameters(), lr = 0.1)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = 5)
+        self.criterion = nn.CrossEntropyLoss()
 
     def cell_forward(self, root, prev_outputs, module_dict, nonce=0):
         nonce += 1
@@ -82,7 +88,6 @@ class Model(nn.Module):
             for layer in self.all_module_block_list[blk_idx]:
                 output = layer(x)
                 prev_outputs.append(output)
-
             for i in range(self.n):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
@@ -102,12 +107,9 @@ class Model(nn.Module):
                     output, _ = self.cell_forward(self.n_cell_list[n_cell_idx].root, prev_outputs, module_dict, nonce = 0)
                     n_cell_idx += 1
                     prev_outputs.append(output)
+
             output = torch.mean(output, dim = (2, 3))
             blk_idx += 1
             output = torch.flatten(output, 1)
             output = F.relu(self.all_module_block_list[blk_idx](output))
             return output
-
-
-    def calculateFitness(self):
-        self.fitness = abs(np.random.randn() + 7)

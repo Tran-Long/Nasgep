@@ -34,7 +34,7 @@ def conv_block (conv_term, in_channel, out_channel):
     return modules
 
 
-class Node():
+class Node:
     def __init__ (self, data, channel=-1):
         self.value = data
         self.left = None
@@ -117,7 +117,6 @@ def calculate_channel_mul(root):
         return root.channel
     root.channel = 1
     return root.channel
-
 
 def expand_tree_cell(root, adfs_genotype_dict):
     if root.value == "sum" or root.value == "cat":

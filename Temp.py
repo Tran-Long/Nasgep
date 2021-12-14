@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import torchvision
 from ADFPopulation import *
 from ReductionCellPopulation import *
+from ModelPopulation import *
 from Model import *
 from ADF import *
 from Cell import *
@@ -34,35 +35,68 @@ classes = ('plane', 'car', 'bird', 'cat',
 
 adf_pop = ADFPopulation(1, 2, 10)
 r_cell_pop = ReductionCellPopulation(4, 5, 10, adf_pop)
-model = Model(adf_pop, r_cell_pop)
+# model = Model(adf_pop, r_cell_pop)
+#
+# criterion = nn.CrossEntropyLoss()
+# optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+# pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+# print(pytorch_total_params)
+#
+# correct = 0
+# total = 0
+# # since we're not training, we don't need to calculate the gradients for our outputs
+# with torch.no_grad():
+#     for data in testloader:
+#         images, labels = data
+#         # calculate outputs by running images through the network
+#         outputs = model(images)
+#         # the class with the highest energy is what we choose as prediction
+#         _, predicted = torch.max(outputs.data, 1)
+#         total += labels.size(0)
+#         correct += (predicted == labels).sum().item()
+#
+# print('Accuracy of the network on the 10000 test images: %d %%' % (
+#     100 * correct / total))
+#
+# for epoch in range(1):  # loop over the dataset multiple times
+#
+#     running_loss = 0.0
+#     for i, data in enumerate(trainloader, 0):
+#         # get the inputs; data is a list of [inputs, labels]
+#         inputs, labels = data
+#
+#         # zero the parameter gradients
+#         optimizer.zero_grad()
+#
+#         # forward + backward + optimize
+#         outputs = model(inputs)
+#         loss = criterion(outputs, labels)
+#         loss.backward()
+#         optimizer.step()
+#
+#         # print statistics
+#         running_loss += loss.item()
+#         if i % 250 == 249:    # print every 2000 mini-batches
+#             print('[%d, %5d] loss: %.3f' %
+#                   (epoch + 1, i + 1, running_loss / 2000))
+#             running_loss = 0.0
+#
+# print('Finished Training')
+# correct = 0
+# total = 0
+# with torch.no_grad():
+#     for data in testloader:
+#         images, labels = data
+#         # calculate outputs by running images through the network
+#         outputs = model(images)
+#         # the class with the highest energy is what we choose as prediction
+#         _, predicted = torch.max(outputs.data, 1)
+#         total += labels.size(0)
+#         correct += (predicted == labels).sum().item()
+#
+# print('Accuracy of the network on the 10000 test images: %d %%' % (
+#     100 * correct / total))
 
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-print(pytorch_total_params)
-"""
-for epoch in range(2):  # loop over the dataset multiple times
-
-    running_loss = 0.0
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data
-
-        # zero the parameter gradients
-        optimizer.zero_grad()
-
-        # forward + backward + optimize
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        # print statistics
-        running_loss += loss.item()
-        if i % 250 == 249:    # print every 2000 mini-batches
-            print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
-            running_loss = 0.0
-
-print('Finished Training')
-"""
+model_pop = ModelPopulation(2, 3, adf_pop, r_cell_pop)
+model_pop.test_population(testloader, model_pop.models_dict)
+model_pop.train_population(trainloader, testloader, model_pop.models_dict)

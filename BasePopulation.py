@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+
 class BasePopulation:
     def __init__ (self, head_size, tail_size, pop_size):
         self.nonce = pop_size
