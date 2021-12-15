@@ -41,8 +41,6 @@ class Node:
         self.right = None
         self.channel = channel
 
-    def __str__ (self):
-        return f'<{self.data} \n {self.left} \n {self.right}>'
 
 def validate_tree_adf(root):
     if root.value in CONV_TERMS:
@@ -118,17 +116,17 @@ def calculate_channel_mul(root):
     root.channel = 1
     return root.channel
 
-def expand_tree_cell(root, adfs_genotype_dict):
+def expand_tree_cell(root, adfs_dict):
     if root.value == "sum" or root.value == "cat":
-        root.left = expand_tree_cell(root.left, adfs_genotype_dict)
-        root.right = expand_tree_cell(root.right, adfs_genotype_dict)
+        root.left = expand_tree_cell(root.left, adfs_dict)
+        root.right = expand_tree_cell(root.right, adfs_dict)
     elif root.value == POINT_WISE_TERM:
-        root.left = expand_tree_cell(root.left, adfs_genotype_dict)
+        root.left = expand_tree_cell(root.left, adfs_dict)
     else:
-        root = build_tree_adf(adfs_genotype_dict[root.value])
+        root = adfs_dict[root.value].root
     return root
 
-def build_tree_cell(genotype, adfs_genotype_dict):
+def build_tree_cell(genotype, adfs_dict):
     root = Node(genotype[0])
     i = 1
     this_level = [root]
@@ -154,7 +152,7 @@ def build_tree_cell(genotype, adfs_genotype_dict):
         new_root_pw = Node(POINT_WISE_TERM, channel = 1)
         new_root_pw.left = root
         root = new_root_pw
-    root = expand_tree_cell(root, adfs_genotype_dict)
+    root = expand_tree_cell(root, adfs_dict)
     return root
 
 def view_tree(t):

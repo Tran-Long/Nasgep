@@ -9,11 +9,11 @@ from Utils import *
 from Cell import *
 
 class Model(nn.Module):
-    def __init__(self, adf_population, cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
+    def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
                  normal_cell=None, reduction_cell=None, for_dataset="cifar-10"):
         super(Model, self).__init__()
-        self.adf_population = adf_population
-        self.cell_population = cell_population
+        self.adf_population = n_adf_population
+        self.cell_population = r_cell_population
         self.all_module_block_list = nn.ModuleList()
         self.for_dataset = for_dataset
         self.n = n
@@ -23,8 +23,8 @@ class Model(nn.Module):
         self.age = 0
         # Select cells
         if normal_cell is None and reduction_cell is None:
-            self.reduction_cell = cell_population.select_random_reduction_cell()
-            self.normal_cell = Cell(4, 5, adf_population, reduction_cell = False)
+            self.reduction_cell = r_cell_population.select_random_reduction_cell()
+            self.normal_cell = Cell(4, 5, n_adf_population)
         else:
             self.normal_cell = normal_cell
             self.reduction_cell = reduction_cell
@@ -54,7 +54,6 @@ class Model(nn.Module):
                     self.all_module_block_list.append(self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
                     prev_outputs.append(0)
             self.all_module_block_list.append(nn.Linear(64, 10))
-
         # Init optimizer and loss
         self.optimizer = torch.optim.SGD(self.parameters(), lr = 0.1)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = 5)

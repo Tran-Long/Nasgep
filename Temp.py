@@ -33,9 +33,10 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
-adf_pop = ADFPopulation(1, 2, 10)
-r_cell_pop = ReductionCellPopulation(4, 5, 10, adf_pop)
-# model = Model(adf_pop, r_cell_pop)
+n_adf_pop = ADFPopulation(1, 2, for_reduction = False, pop_size = 10)
+r_adf_pop = ADFPopulation(1, 2, for_reduction = True, pop_size = 10)
+r_cell_pop = ReductionCellPopulation(4, 5, 10, r_adf_pop)
+# model = Model(n_adf_pop, r_cell_pop)
 #
 # criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
@@ -97,6 +98,8 @@ r_cell_pop = ReductionCellPopulation(4, 5, 10, adf_pop)
 # print('Accuracy of the network on the 10000 test images: %d %%' % (
 #     100 * correct / total))
 
-model_pop = ModelPopulation(2, 3, adf_pop, r_cell_pop)
+
+model_pop = ModelPopulation(1, 3, n_adf_pop, r_cell_pop)
 model_pop.test_population(testloader, model_pop.models_dict)
+model_pop.train_population(trainloader, testloader, model_pop.models_dict)
 model_pop.train_population(trainloader, testloader, model_pop.models_dict)
