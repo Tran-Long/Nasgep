@@ -15,7 +15,7 @@ class ADF:
         if for_reduction:
             self.root = self.add_pwbr_for_reduction(self.root)
         self.fitness = -1
-        self.is_used = False
+        self.is_used = 0
 
     @staticmethod
     def init_data (adf_head, adf_tail):
@@ -49,5 +49,8 @@ class ADF:
             else:
                 root.right = self.add_pwbr_for_reduction(root.right)
         return root
+
+    def set_fitness(self, fitness):
+        self.fitness = max(self.fitness, fitness)
 # temp = ADF()
 # view_tree(temp.root)
