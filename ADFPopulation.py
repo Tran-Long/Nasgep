@@ -17,7 +17,10 @@ class ADFPopulation(BasePopulation):
         self.terminal_set = ADF_TERMINAL
 
     def kill_bad_genes(self):
-        pass
+        if T_G != -1:
+            adf_id_to_remove = [adf_id for (adf_id, adf) in self.adfs_dict.items() if adf.fitness != -1 and adf.is_used == 0 and adf.fitness < T_G]
+            for adf_id in adf_id_to_remove:
+                self.remove_adf(adf_id)
 
     def add_adf(self, adf_genotype):
         adf = ADF(for_reduction = self.for_reduction, reproduction_genotype = adf_genotype)
@@ -25,20 +28,29 @@ class ADFPopulation(BasePopulation):
         self.nonce += 1
         self.adfs_dict[adf_key] = adf
         self.keys_list.append(adf_key)
-        self.population.append(adf)
+        self.child_population.append(adf)
+        self.child_pop_size += 1
 
     def remove_adf(self, adf_key):
         adf_index_in_list = self.keys_list.index(adf_key)
         self.adfs_dict.pop(adf_key)
         self.keys_list.pop(adf_index_in_list)
         self.population.pop(adf_index_in_list)
+        self.pop_size -= 1
 
-    def reproduction(self, min_child, max_child):
+    def reproduction(self):
         num_of_new_adf = min(self.max_size - self.pop_size, MAX_CHILD_ADF)
         assert num_of_new_adf >= MIN_CHILD_ADF, "Must create at least min = " + str(MIN_CHILD_ADF) + " child"
-        # for i in range(num_of_new_adf):
-        pass
-
+        num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
+        while self.child_pop_size < num_of_new_adf:
+            new_adf_genotype_1, new_adf_genotype_2 = self.reproduction_individual_genotype()
+            self.add_adf(new_adf_genotype_1)
+            self.add_adf(new_adf_genotype_2)
+        # merge and clear child_pop
+        self.population = self.population + self.child_population
+        self.pop_size += self.child_pop_size
+        self.child_population = []
+        self.child_pop_size = 0
 
 
 # from Utils import *
