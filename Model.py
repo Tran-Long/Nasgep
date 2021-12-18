@@ -2,19 +2,16 @@ import copy
 
 import torch
 import torch.nn.functional as F
-import torch.nn as nn
-import numpy as np
-from Configs import *
-from Utils import *
 from Cell import *
 
 class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
                  normal_cell=None, reduction_cell=None, for_dataset="cifar-10"):
         super(Model, self).__init__()
-        self.adf_population = n_adf_population
-        self.cell_population = r_cell_population
+        self.adf_population = n_adf_population  # for normal cell making
+        self.cell_population = r_cell_population  # for reduction cell making
         self.all_module_block_list = nn.ModuleList()
+        self.all_cell_file_list = []  # for saving weight... contain dicts, each represent for a cell
         self.for_dataset = for_dataset
         self.n = n
         self.fitness = -1
@@ -34,25 +31,32 @@ class Model(nn.Module):
         if for_dataset == "cifar-10":
             self.n_cell_list = []
             self.r_cell_list = []
-            self.all_module_block_list.append(nn.ModuleList([conv_block(STEM_TERM, 3, NUM_CHANNELS)]))
+            self.all_module_block_list.append(nn.ModuleList([conv_block(STEM_TERM, current_input_channel, NUM_CHANNELS)]))
             current_input_channel = 16
             prev_outputs.append(0)
 
             # 1st normal block => channel = 16
             for i in range(n):
                 self.n_cell_list.append(copy.deepcopy(self.normal_cell))
-                self.all_module_block_list.append(self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
+                module_dict, path_dict = self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel)
+                self.all_module_block_list.append(module_dict)
+                self.all_cell_file_list.append(path_dict)
                 prev_outputs.append(0)
 
             for k in range(2):
                 current_input_channel *= 2
                 self.r_cell_list.append(copy.deepcopy(self.reduction_cell))
-                self.all_module_block_list.append(self.r_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
+                module_dict, path_dict = self.r_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel)
+                self.all_module_block_list.append(module_dict)
+                self.all_cell_file_list.append(path_dict)
                 prev_outputs = [0]
                 for i in range(n):
                     self.n_cell_list.append(copy.deepcopy(self.normal_cell))
-                    self.all_module_block_list.append(self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel))
+                    module_dict, path_dict = self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel)
+                    self.all_module_block_list.append(module_dict)
+                    self.all_cell_file_list.append(path_dict)
                     prev_outputs.append(0)
+            self.all_module_block_list.append(nn.BatchNorm2d(current_input_channel))
             self.all_module_block_list.append(nn.Linear(64, 10))
         # Init optimizer and loss
         self.optimizer = torch.optim.SGD(self.parameters(), lr = 0.1)
@@ -107,8 +111,23 @@ class Model(nn.Module):
                     n_cell_idx += 1
                     prev_outputs.append(output)
 
-            output = torch.mean(output, dim = (2, 3))
             blk_idx += 1
+            output = F.relu(self.all_module_block_list[blk_idx](output))  # Batch norm + relu
+            output = torch.mean(output, dim = (2, 3))
             output = torch.flatten(output, 1)
-            output = F.relu(self.all_module_block_list[blk_idx](output))
+            blk_idx += 1
+            output = F.relu(self.all_module_block_list[blk_idx](output))  # Fully connected
             return output
+
+    def save_weight(self):
+        pass
+
+    def set_fitness(self, fitness):
+        self.fitness = fitness
+        self.normal_cell.set_fitness(fitness)
+        self.reduction_cell.set_fitness(fitness)
+
+    def mark_to_be_killed(self):
+        self.mark_killed = True
+        self.normal_cell.mark_to_be_killed()
+        self.reduction_cell.mark_to_be_killed()

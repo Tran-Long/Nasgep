@@ -6,7 +6,7 @@ import torch.optim as optim
 import torchvision.transforms as transforms
 import torchvision
 from ADFPopulation import *
-from ReductionCellPopulation import *
+from CellPopulation import *
 from ModelPopulation import *
 from Model import *
 from ADF import *
@@ -35,7 +35,8 @@ classes = ('plane', 'car', 'bird', 'cat',
 
 n_adf_pop = ADFPopulation(1, 2, for_reduction = False, pop_size = 10)
 r_adf_pop = ADFPopulation(1, 2, for_reduction = True, pop_size = 10)
-r_cell_pop = ReductionCellPopulation(4, 5, 10, r_adf_pop)
+r_cell_pop = CellPopulation(4, 5, 10, r_adf_pop)
+n_cell_pop = CellPopulation(4, 5, 10, n_adf_pop)
 # model = Model(n_adf_pop, r_cell_pop)
 #
 # criterion = nn.CrossEntropyLoss()
@@ -99,7 +100,9 @@ r_cell_pop = ReductionCellPopulation(4, 5, 10, r_adf_pop)
 #     100 * correct / total))
 
 
-model_pop = ModelPopulation(1, 3, n_adf_pop, r_cell_pop)
-model_pop.test_population(testloader, model_pop.models_dict)
-model_pop.train_population(trainloader, testloader, model_pop.models_dict)
-model_pop.train_population(trainloader, testloader, model_pop.models_dict)
+model_pop = ModelPopulation(2, 3, n_adf_pop, r_cell_pop)
+model_pop.survivor_selection()
+# model_pop.test_population(testloader, model_pop.models_dict)
+# model_pop.train_population(trainloader, testloader, model_pop.models_dict)
+# model_pop.train_population(trainloader, testloader, model_pop.models_dict)
+

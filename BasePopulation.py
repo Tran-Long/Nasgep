@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+from Configs import *
 
 class BasePopulation:
     def __init__ (self, head_size, tail_size, pop_size):
@@ -12,8 +13,9 @@ class BasePopulation:
         self.terminal_set = None
         self.population = []
         self.child_population = []
+        self.child_pop_size = 0
 
-    def tournament_selection (self, k = 8):
+    def tournament_selection (self, k = TOURNAMENT_SELECTION_SIZE):
         # select random k indices, represent objects position in population
         list_object_indices = np.array([], dtype = int)
         while len(list_object_indices) < k:
@@ -46,15 +48,15 @@ class BasePopulation:
     def replication(self, obj):
         return copy.deepcopy(obj)
 
-    def mutation (self, genotype, function_set, terminal_set, rate = 0.05):  # genotype == array of elements
+    def mutation (self, genotype, rate = 0.05):  # genotype == array of elements
         if np.random.rand() <= rate:
             mutation_pos = np.random.randint(self.length)
             if mutation_pos < self.head_size:
                 # head_set = terminal_set + function_set
-                head_set = function_set
+                head_set = self.function_set
                 genotype[mutation_pos] = np.random.choice(head_set)
             else:
-                tail_set = terminal_set
+                tail_set = self.terminal_set
                 genotype[mutation_pos] = np.random.choice(tail_set)
         return genotype
 
@@ -126,8 +128,10 @@ class BasePopulation:
             for i in range(random_point, self.length):
                 child2_genotype[i] = genotype_dad[i]
                 child1_genotype[i] = genotype_mom[i]
+            genotype_dad = child1_genotype
+            genotype_mom = child2_genotype
 
-        return child1_genotype, child2_genotype
+        return genotype_dad, genotype_mom
 
     def two_point_recombination (self, genotype_dad, genotype_mom, rate = 0.2):
         if np.random.rand() <= rate:
@@ -149,23 +153,17 @@ class BasePopulation:
             for i in range(random_point2, self.length):
                 child1_genotype[i] = genotype_dad[i]
                 child2_genotype[i] = genotype_mom[i]
+            genotype_dad = child1_genotype
+            genotype_mom = child2_genotype
 
-        return child1_genotype, child2_genotype
-
-    def reproduction_individual_genotype_lonely(self):
-        lonely_genotype, _ = self.tournament_selection()
-        lonely_genotype = self.replication(lonely_genotype)
-        lonely_genotype = self.mutation(lonely_genotype, self.function_set, self.terminal_set)
-        lonely_genotype = self.transposition(lonely_genotype)
-        lonely_genotype = self.root_transposition(lonely_genotype)
-        return lonely_genotype
+        return genotype_dad, genotype_mom
 
     def reproduction_individual_genotype(self):
         genotype_mom, genotype_dad = self.tournament_selection()
         genotype_mom = self.replication(genotype_mom)
         genotype_dad = self.replication(genotype_dad)
-        genotype_mom = self.mutation(genotype_mom, self.function_set, self.terminal_set)
-        genotype_dad = self.mutation(genotype_dad, self.function_set, self.terminal_set)
+        genotype_mom = self.mutation(genotype_mom)
+        genotype_dad = self.mutation(genotype_dad)
         genotype_mom = self.transposition(genotype_mom)
         genotype_dad = self.transposition(genotype_dad)
         genotype_mom = self.root_transposition(genotype_mom)

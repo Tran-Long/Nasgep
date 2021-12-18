@@ -8,7 +8,7 @@ from Cell import *
 from Utils import *
 from ADF import *
 from ADFPopulation import *
-from ReductionCellPopulation import *
+from CellPopulation import *
 
 adf_pop = ADFPopulation(1, 2, 10)
 cell_genotype = ["cat", "sum", "cat", "cat", "adf1", "adf1", "adf9", "adf5", "adf3"]
@@ -28,7 +28,7 @@ c = Cell(4, 5, adf_pop, reduction_cell = True, reproduction_genotype = cell_geno
 """
     Test affecting of population object
 """
-cell_pop = ReductionCellPopulation(4, 5, 10, adf_pop)
+cell_pop = CellPopulation(4, 5, 10, adf_pop)
 new_adf_genotype = ["sum", "dep_3x3", "isep_3x3"]
 print(cell_pop.terminal_set)
 

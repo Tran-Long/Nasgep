@@ -2,6 +2,9 @@
 import torch.nn as nn
 from Configs import *
 
+def create_file_name_conv(conv_term, in_channel, out_channel):
+    return conv_term + "_" + str(in_channel) + "_" + str(out_channel) + ".pth"
+
 def get_detail_conv(conv_term):
     array = conv_term.split("_")
     return array[0], array[1]
