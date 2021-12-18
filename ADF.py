@@ -4,7 +4,7 @@ from Configs import *
 from Utils import *
 
 class ADF:
-    def __init__(self, adf_head=1, adf_tail=2, for_reduction=True, reproduction_genotype = None):
+    def __init__(self, adf_head, adf_tail, for_reduction=True, reproduction_genotype = None):
         super(ADF, self).__init__()
         if reproduction_genotype is None:
             self.genotype = self.init_data(adf_head, adf_tail)

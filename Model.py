@@ -1,12 +1,10 @@
-import copy
-
 import torch
 import torch.nn.functional as F
 from Cell import *
 
 class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
-                 normal_cell=None, reduction_cell=None, for_dataset="cifar-10"):
+                 normal_cell=None, reduction_cell=None, for_dataset=DATASET):
         super(Model, self).__init__()
         self.adf_population = n_adf_population  # for normal cell making
         self.cell_population = r_cell_population  # for reduction cell making

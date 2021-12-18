@@ -48,7 +48,7 @@ class BasePopulation:
     def replication(self, obj):
         return copy.deepcopy(obj)
 
-    def mutation (self, genotype, rate = 0.05):  # genotype == array of elements
+    def mutation (self, genotype, rate = RPD_MUTATION_RATE):  # genotype == array of elements
         if np.random.rand() <= rate:
             mutation_pos = np.random.randint(self.length)
             if mutation_pos < self.head_size:
@@ -60,7 +60,7 @@ class BasePopulation:
                 genotype[mutation_pos] = np.random.choice(tail_set)
         return genotype
 
-    def transposition (self, genotype, rate = 0.1, is_elements_cnt = 3):
+    def transposition (self, genotype, rate = RPD_TRANSPOSITION_RATE, is_elements_cnt = RPD_IS_ELE_CNT):
         if np.random.rand() <= rate:
             if self.head_size > 1:
                 # select start of transposon
@@ -86,7 +86,7 @@ class BasePopulation:
                     genotype.pop(self.head_size)
         return genotype
 
-    def root_transposition (self, genotype, rate = 0.1, ris_elements_cnt = 3):
+    def root_transposition (self, genotype, rate = RPD_ROOT_TRANSPOSITION_RATE, ris_elements_cnt = RPD_RIS_ELE_CNT):
         if np.random.rand() <= rate:
             # find function / start of the transposon
             ris_start = None
@@ -117,7 +117,7 @@ class BasePopulation:
                     genotype.pop(self.head_size)
         return genotype
 
-    def one_point_recombination (self, genotype_dad, genotype_mom, rate = 0.5):
+    def one_point_recombination (self, genotype_dad, genotype_mom, rate = RPD_1_RECOMBINATION_RATE):
         if np.random.rand() <= rate:
             random_point = np.random.randint(self.length) + 1
             child1_genotype = copy.deepcopy(genotype_dad)
@@ -133,7 +133,7 @@ class BasePopulation:
 
         return genotype_dad, genotype_mom
 
-    def two_point_recombination (self, genotype_dad, genotype_mom, rate = 0.2):
+    def two_point_recombination (self, genotype_dad, genotype_mom, rate = RPD_2_RECOMBINATION_RATE):
         if np.random.rand() <= rate:
             random1 = np.random.randint(self.length) + 1
             random2 = np.random.randint(self.length) + 1

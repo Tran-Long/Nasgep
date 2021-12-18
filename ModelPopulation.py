@@ -67,7 +67,7 @@ class ModelPopulation:
                 for data in test_loader:
                     inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     # calculate outputs by running images through the network
-                    outputs = model(images)
+                    outputs = model(inputs)
                     # the class with the highest energy is what we choose as prediction
                     _, predicted = torch.max(outputs.data, 1)
                     total += labels.size(0)
@@ -87,7 +87,7 @@ class ModelPopulation:
             for data in test_loader:
                 inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                 # calculate outputs by running images through the network
-                outputs = model(images)
+                outputs = model(inputs)
                 # the class with the highest energy is what we choose as prediction
                 _, predicted = torch.max(outputs.data, 1)
                 total += labels.size(0)
