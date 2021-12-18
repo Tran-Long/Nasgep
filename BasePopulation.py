@@ -92,7 +92,7 @@ class BasePopulation:
             ris_start = None
             random_start = np.random.randint(self.head_size)
             while random_start < self.head_size:
-                if self.genotype[random_start] in self.function_set:
+                if genotype[random_start] in self.function_set:
                     ris_start = random_start
                     break
                 random_start += 1

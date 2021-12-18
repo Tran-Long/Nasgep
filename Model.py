@@ -25,6 +25,13 @@ class Model(nn.Module):
         else:
             self.normal_cell = normal_cell
             self.reduction_cell = reduction_cell
+        """--------------------------------------------"""
+        print("\t\t\t", end = "")
+        print(self.normal_cell.genotype)
+        print("\t\t\t", end = "")
+        print(self.reduction_cell.genotype)
+        """--------------------------------------------"""
+
         # Init network representation
         current_input_channel = 3
         prev_outputs = []

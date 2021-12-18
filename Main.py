@@ -40,20 +40,27 @@ year = 0
 while year <= 2:
     year += 1
     # Step 4
+    print("*****Step 4 - kill bad gene*****")
     normal_adf_pop.kill_bad_genes()
     reduction_adf_pop.kill_bad_genes()
     # Step 5
+    print("*****Step 5 - reproduction *****")
     normal_adf_pop.reproduction()
     reduction_adf_pop.reproduction()
     reduction_cell_pop.reproduction()
     model_pop.reproduction()
     # Step 6
+    print("*****Step 6 - evaluate child pop")
     model_pop.evaluate_population_step_6(train_loader, test_loader, model_pop.child_models_dict)
     # Step 7
+    print("*****Step 7 - survivor*****")
     model_pop.survivor_selection()
     reduction_cell_pop.remove_marked_kill_cell()
     # STep 8
-    model_pop.merge_dict()
+    print("*****Step 8 - full training and update T-g, T-c*****")
     model_pop.evaluate_population_step_6(train_loader, test_loader, model_pop.models_dict)
+    model_pop.increase_age()
     T_G = min([model.fitness for (model_id, model) in model_pop.models_dict.items()])
     T_C = 0.75*T_G
+    print("\tUpdated T_G, T_C:\t", end = "")
+    print("T_G = %.2f, T_C = %.2f" % T_G, T_C)

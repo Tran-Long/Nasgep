@@ -6,6 +6,7 @@ CONV_TERMS = ['dep_3x3', 'dep_5x5', 'dep_3x5', 'dep_5x3', 'dep_1x7', 'dep_7x1',
 BEST_ACC_CONV = {conv: 0 for conv in CONV_TERMS}
 CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
 
+DEVICE = "cuda:0"
 TOURNAMENT_SELECTION_SIZE = 8
 
 ADF_HEAD_LEN = 1

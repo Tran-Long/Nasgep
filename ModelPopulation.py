@@ -12,15 +12,23 @@ class ModelPopulation:
         self.models_dict = {}
         for i in range(pop_size):
             model_id = MODEL_PREFIX + str(i)
+            print("\t" + model_id + " created: ")
             self.models_dict[model_id] = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
+            self.models_dict[model_id].to(DEVICE)
         self.population = list(self.models_dict.values())
         self.child_models_dict = {}
         self.child_pop_size = 0
         # self.child_population = []
 
     def reproduction(self):
+        print("\tBefore:")
+        print("\t\t", end="")
+        print(self.models_dict.keys())
         for (model_id, model) in self.models_dict.items():
             self.add_model(model.normal_cell)
+        print("\tAfter:")
+        print("\t\t", end="")
+        print(self.models_dict.keys())
 
     """
         Used for add model to child population, input 
@@ -29,8 +37,10 @@ class ModelPopulation:
         reduction_cell = self.r_cell_population.select_random_reduction_cell()
         normal_cell = old_normal_cell.reproduction()
         model_id = MODEL_PREFIX + str(self.nonce)
+        print("\t" + model_id + " created and added: ")
         self.nonce += 1
         new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell, self.for_dataset)
+        new_model.to(DEVICE)
         self.child_models_dict[model_id] = new_model
         # self.child_population.append(new_model)
         self.child_pop_size += 1
@@ -55,7 +65,7 @@ class ModelPopulation:
             correct = 0
             with torch.no_grad():
                 for data in test_loader:
-                    images, labels = data
+                    inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     # calculate outputs by running images through the network
                     outputs = model(images)
                     # the class with the highest energy is what we choose as prediction
@@ -75,7 +85,7 @@ class ModelPopulation:
         correct = 0
         with torch.no_grad():
             for data in test_loader:
-                images, labels = data
+                inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                 # calculate outputs by running images through the network
                 outputs = model(images)
                 # the class with the highest energy is what we choose as prediction
@@ -91,10 +101,10 @@ class ModelPopulation:
                 model.epoch_cnt += 1
                 if model.epoch_cnt == EPOCH_MAX:
                     model.mark_to_be_killed()
-                print("----------------------")
-                print("Training " + model_id + ".....")
+                print("-----------------------------")
+                print("\t\tTraining " + model_id + ".....")
                 for i, data in enumerate(train_loader, 0):
-                    inputs, labels = data
+                    inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     model.zero_grad()
                     outputs = model(inputs)
                     loss = model.criterion(outputs, labels)
@@ -102,18 +112,19 @@ class ModelPopulation:
                     loss.backward()
                     model.optimizer.step()
                 model.scheduler.step()
-                print("Training " + model_id + " finished")
-                print("----------------------")
-                print("ACCURACY: ", end = " ")
+                print("\t\tTraining " + model_id + " finished")
+                print("\t\tACCURACY: ", end = " ")
                 self.test_model(train_loader, model_id, model)
-                print("VALIDATION: ", end = " ")
+                print("\t\tVALIDATION: ", end = " ")
                 self.test_model(test_loader, model_id, model)
-                print("----------------------")
+                print("-------------------------------")
 
     def evaluate_population_step_6(self, train_loader, test_loader, pop):
         self.train_population(train_loader, test_loader, pop)
-        extra_models = {model_id: model for (model_id, model) in pop.items() if model.fitness >= T_C}
-        self.train_population(train_loader, test_loader, extra_models)
+        if T_C != -1:
+            print("\t\t Base score for another epoch = " + str(T_C))
+            extra_models = {model_id: model for (model_id, model) in pop.items() if model.fitness >= T_C}
+            self.train_population(train_loader, test_loader, extra_models)
 
     def increase_age(self):
         for (model_id, model) in self.models_dict.items():
@@ -121,6 +132,9 @@ class ModelPopulation:
 
     def survivor_selection(self):
         self.merge_dict()
+        print("\tAll model: ")
+        print("\t\t", end = "")
+        print({model_id: (model.fitness, model.age, model.mark_killed) for (model_id, model) in self.models_dict.items()})
 
         all_id = list(self.models_dict.keys())
         model_id_to_preserve = []
@@ -154,8 +168,13 @@ class ModelPopulation:
 
         model_id_to_remove.extend(all_id)
         assert len(set(model_id_to_preserve)) + len(set(model_id_to_remove)) == self.pop_size, "Wrong survivor"
+        print("\tModel to preserve: ")
+        print("\t\t", end = "")
+        print(model_id_to_preserve)
 
         for model_id in model_id_to_remove:
             self.remove_model(model_id)
 
-
+        print("\tModels left: ")
+        print("\t\t", end = "")
+        print(self.models_dict.keys())

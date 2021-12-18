@@ -18,9 +18,15 @@ class ADFPopulation(BasePopulation):
 
     def kill_bad_genes(self):
         if T_G != -1:
+            print("\tAdf pop consist: ")
+            print("\t\t", end = "")
+            print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
             adf_id_to_remove = [adf_id for (adf_id, adf) in self.adfs_dict.items() if adf.fitness != -1 and adf.is_used == 0 and adf.fitness < T_G]
             for adf_id in adf_id_to_remove:
                 self.remove_adf(adf_id)
+            print("\tAdf left: ")
+            print("\t\t", end = "")
+            print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
 
     def add_adf(self, adf_genotype):
         adf = ADF(for_reduction = self.for_reduction, reproduction_genotype = adf_genotype)
@@ -42,6 +48,7 @@ class ADFPopulation(BasePopulation):
         num_of_new_adf = min(self.max_size - self.pop_size, MAX_CHILD_ADF)
         assert num_of_new_adf >= MIN_CHILD_ADF, "Must create at least min = " + str(MIN_CHILD_ADF) + " child"
         num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
+        print("\tCreate " + str(num_of_new_adf) + " new adf")
         while self.child_pop_size < num_of_new_adf:
             new_adf_genotype_1, new_adf_genotype_2 = self.reproduction_individual_genotype()
             self.add_adf(new_adf_genotype_1)
