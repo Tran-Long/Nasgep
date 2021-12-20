@@ -123,8 +123,8 @@ class ModelPopulation:
                     model.optimizer.step()
                 model.scheduler.step()
                 print("\t\tTraining " + model_id + " finished")
-                print("\t\tACCURACY: ", end = " ")
-                self.test_model(train_loader, model_id, model)
+                # print("\t\tACCURACY: ", end = " ")
+                # self.test_model(train_loader, model_id, model)
                 print("\t\tVALIDATION: ", end = " ")
                 self.test_model(test_loader, model_id, model)
                 print("-------------------------------")
@@ -150,22 +150,28 @@ class ModelPopulation:
         model_id_to_preserve = []
         model_id_to_remove = []
 
+        """Keep best fitness"""
         max_fitness = max([self.models_dict[model_id].fitness for model_id in all_id])
         max_fitness_model_id = [model_id for model_id in all_id if self.models_dict[model_id].fitness == max_fitness]
         model_id_to_preserve.extend(max_fitness_model_id)
         all_id = np.setdiff1d(all_id, max_fitness_model_id)
 
         if len(model_id_to_preserve) + len(all_id) > INIT_SIZE_MODEL_POP:
+            """Remove oldest with lowest fitness"""
             age_list = [self.models_dict[model_id].age for model_id in all_id]
             max_age = max(age_list)
             oldest_model_id = [model_id for model_id in all_id if self.models_dict[model_id].age == max_age]
-            model_id_to_remove.extend(oldest_model_id)
-            all_id = np.setdiff1d(all_id, oldest_model_id)
+            min_fitness_old = max([self.models_dict[model_id].fitness for model_id in oldest_model_id])
+            min_fitness_old_model_id = [model_id for model_id in oldest_model_id if self.models_dict[model_id].fitness == min_fitness_old]
+            model_id_to_remove.extend(min_fitness_old_model_id)
+            all_id = np.setdiff1d(all_id, min_fitness_old_model_id)
 
+            """Remove mark killed"""
             mark_killed_model_id = [model_id for model_id in all_id if self.models_dict[model_id].mark_killed == True]
             model_id_to_remove.extend(mark_killed_model_id)
             all_id = np.setdiff1d(all_id, mark_killed_model_id)
 
+        """Keeping fitness in descending order"""
         diff = len(model_id_to_preserve) + len(all_id) - INIT_SIZE_MODEL_POP
         if diff > 0:
             num_to_preserve = INIT_SIZE_MODEL_POP - len(model_id_to_preserve)
