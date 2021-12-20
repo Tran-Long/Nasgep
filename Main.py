@@ -64,4 +64,4 @@ while year <= 2:
     T_G = min([model.fitness for (model_id, model) in model_pop.models_dict.items()])
     T_C = 0.75*T_G
     print("\tUpdated T_G, T_C:\t", end = "")
-    print("T_G = %.2f, T_C = %.2f" % T_G, T_C)
+    print("T_G = %.2f, T_C = %.2f" % (T_G, T_C))
