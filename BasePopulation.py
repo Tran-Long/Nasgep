@@ -18,13 +18,10 @@ class BasePopulation:
     def tournament_selection (self, k = TOURNAMENT_SELECTION_SIZE):
         # select random k indices, represent objects position in population
         list_object_indices = np.array([], dtype = int)
-        print("Index-chosen: ", end = "")
         while len(list_object_indices) < k:
             index = np.random.randint(self.pop_size)
-            print(index, end = " ")
             if index not in list_object_indices:
                 list_object_indices = np.append(list_object_indices, index)
-        print()
         # fighting till 2 parents left
         np.random.shuffle(list_object_indices)
         while len(list_object_indices) > 2:

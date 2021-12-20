@@ -185,3 +185,10 @@ def view_tree_channel(t):
                     n_level.append(t_node.right)
         print()
         t_level = n_level
+
+def view_model_info(model_id, model):
+    print("\tModel " + model_id + " created with " + str(model.num_params) + " parameter")
+    print("\t\t", end = "")
+    print(model.normal_cell.genotype)
+    print("\t\t", end = "")
+    print(model.reduction_cell.genotype)

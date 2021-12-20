@@ -18,7 +18,9 @@ class ModelPopulation:
                 new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell = reduction_cell)
             model_id = MODEL_PREFIX + str(self.nonce)
             self.nonce += 1
-            print("\t" + model_id + " created: ")
+            """"""
+            view_model_info(new_model)
+            """"""
             self.models_dict[model_id] = new_model
             self.models_dict[model_id].to(DEVICE)
         self.population = list(self.models_dict.values())
@@ -34,7 +36,8 @@ class ModelPopulation:
             self.add_model(model.normal_cell)
         print("\tAfter:")
         print("\t\t", end="")
-        print(self.models_dict.keys())
+        print(self.models_dict.keys(), end = " ")
+        print(self.child_models_dict.keys())
 
     """
         Used for add model to child population, input 
@@ -48,7 +51,9 @@ class ModelPopulation:
             normal_cell = Cell(self.n_adf_population)
             new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell,  reduction_cell = reduction_cell)
         model_id = MODEL_PREFIX + str(self.nonce)
-        print("\t" + model_id + " created and added: ")
+        """"""
+        view_model_info(new_model)
+        """"""
         self.nonce += 1
         new_model.to(DEVICE)
         self.child_models_dict[model_id] = new_model
@@ -112,7 +117,7 @@ class ModelPopulation:
                 if model.epoch_cnt == EPOCH_MAX:
                     model.mark_to_be_killed()
                 print("-----------------------------")
-                print("\t\tTraining " + model_id + ".....")
+                print("\t\tTraining " + model_id + ".....", end = " ")
                 for i, data in enumerate(train_loader, 0):
                     inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     model.zero_grad()
@@ -122,7 +127,7 @@ class ModelPopulation:
                     loss.backward()
                     model.optimizer.step()
                 model.scheduler.step()
-                print("\t\tTraining " + model_id + " finished")
+                print("Training " + model_id + " finished")
                 # print("\t\tACCURACY: ", end = " ")
                 # self.test_model(train_loader, model_id, model)
                 print("\t\tVALIDATION: ", end = " ")
