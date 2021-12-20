@@ -3,14 +3,22 @@ from BasePopulation import *
 from Configs import *
 
 class ADFPopulation(BasePopulation):
-    def __init__(self, head_size, tail_size, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP):
+    def __init__(self, head_size, tail_size, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, extra = False):
         super(ADFPopulation, self).__init__(head_size, tail_size, pop_size)
         self.for_reduction = for_reduction
         self.adfs_dict = {}
         self.max_size = max_size
-        for i in range(self.pop_size):
-            adf_id = ADF_PREFIX + str(i)
-            self.adfs_dict[adf_id] = ADF(1, 2, for_reduction)
+        self.extra = extra
+        self.existed_genotype = []
+        while len(self.adfs_dict) < pop_size:
+            new_adf = ADF(head_size, tail_size, for_reduction)
+            if extra and new_adf.genotype in self.existed_genotype:
+                continue
+            adf_id = ADF_PREFIX + str(self.nonce)
+            self.nonce += 1
+            self.adfs_dict[adf_id] = new_adf
+            if extra:
+                self.existed_genotype.append(new_adf.genotype)
         self.keys_list = list(self.adfs_dict.keys())
         self.population = list(self.adfs_dict.values())
         self.function_set = ADF_FUNCTION
@@ -30,12 +38,16 @@ class ADFPopulation(BasePopulation):
 
     def add_adf(self, adf_genotype):
         adf = ADF(for_reduction = self.for_reduction, reproduction_genotype = adf_genotype)
+        if self.extra and adf.genotype in self.existed_genotype:
+            return
         adf_key = ADF_PREFIX + str(self.nonce)
         self.nonce += 1
         self.adfs_dict[adf_key] = adf
         self.keys_list.append(adf_key)
         self.child_population.append(adf)
         self.child_pop_size += 1
+        if self.extra:
+            self.existed_genotype.append(adf.genotype)
 
     def remove_adf(self, adf_key):
         adf_index_in_list = self.keys_list.index(adf_key)

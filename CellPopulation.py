@@ -7,12 +7,20 @@ import numpy as np
     Reduction population
 '''
 class CellPopulation(BasePopulation):
-    def __init__(self, head_size, tail_size, pop_size, r_adf_population):
+    def __init__(self, head_size, tail_size, pop_size, r_adf_population, extra = False):
         super(CellPopulation, self).__init__(head_size, tail_size, pop_size)
         self.cells_dict = {}
-        for i in range(self.pop_size):
-            cell_id = CELL_PREFIX + str(i)
-            self.cells_dict[cell_id] = Cell(head_size, tail_size, r_adf_population)
+        self.extra = extra
+        self.existed_genotype = []
+        while len(self.cells_dict) < pop_size:
+            new_cell = Cell(r_adf_population, head_size, tail_size)
+            if extra and new_cell.genotype in self.existed_genotype:
+                continue
+            cell_id = CELL_PREFIX + str(self.nonce)
+            self.nonce += 1
+            self.cells_dict[cell_id] = Cell(r_adf_population, head_size, tail_size)
+            if extra:
+                self.existed_genotype.append(new_cell.genotype)
         self.keys_list = list(self.cells_dict.keys())
         self.population = list(self.cells_dict.values())
         self.adf_population = r_adf_population
@@ -26,13 +34,17 @@ class CellPopulation(BasePopulation):
         return self.cells_dict[cell_term]
 
     def add_cell(self, genotype):
-        cell = Cell(self.head_size, self.tail_size, self.adf_population, reproduction_genotype = genotype)
+        cell = Cell(self.adf_population, self.head_size, self.tail_size, reproduction_genotype = genotype)
+        if self.extra and cell.genotype in self.existed_genotype:
+            return
         cell_id = CELL_PREFIX + str(self.nonce)
         self.nonce += 1
         self.cells_dict[cell_id] = cell
         self.keys_list.append(cell_id)
         self.child_population.append(cell)
         self.child_pop_size += 1
+        if self.extra:
+            self.existed_genotype.append(cell.genotype)
 
     def remove_cell(self, cell_id):
         cell_idx_in_list = self.keys_list.index(cell_id)

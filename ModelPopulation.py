@@ -2,7 +2,7 @@ from Model import *
 
 # This population is kinda different from 2 previous populations
 class ModelPopulation:
-    def __init__(self, pop_size, n, n_adf_population, r_cell_population, for_dataset = "cifar-10"):
+    def __init__(self, pop_size, n, n_adf_population, r_cell_population, for_dataset = "cifar-10", extra = False):
         self.nonce = pop_size
         self.pop_size = pop_size
         self.n = n
@@ -10,10 +10,21 @@ class ModelPopulation:
         self.r_cell_population = r_cell_population
         self.for_dataset = for_dataset
         self.models_dict = {}
-        for i in range(pop_size):
-            model_id = MODEL_PREFIX + str(i)
+        self.extra = extra
+        self.existed_genotype = []
+        while len(self.models_dict) < pop_size:
+            new_model = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
+            new_model_genotype = new_model.normal_cell.genotype + new_model.reduction_cell.genotype
+            if extra and new_model_genotype in self.existed_genotype:
+                continue
+            if new_model.num_params > MAX_MODEL_PARAMS:
+                continue
+            model_id = MODEL_PREFIX + str(self.nonce)
+            self.nonce += 1
             print("\t" + model_id + " created: ")
-            self.models_dict[model_id] = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
+            self.models_dict[model_id] = new_model
+            if extra:
+                self.existed_genotype.append(new_model_genotype)
             self.models_dict[model_id].to(DEVICE)
         self.population = list(self.models_dict.values())
         self.child_models_dict = {}
@@ -36,14 +47,21 @@ class ModelPopulation:
     def add_model(self, old_normal_cell):
         reduction_cell = self.r_cell_population.select_random_reduction_cell()
         normal_cell = old_normal_cell.reproduction()
+        new_model_genotype = normal_cell.genotype + reduction_cell.genotype
+        if self.extra and new_model_genotype in self.existed_genotype:
+            return
+        new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell, self.for_dataset)
+        if new_model.num_params > MAX_MODEL_PARAMS:
+            return
         model_id = MODEL_PREFIX + str(self.nonce)
         print("\t" + model_id + " created and added: ")
         self.nonce += 1
-        new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell, self.for_dataset)
         new_model.to(DEVICE)
         self.child_models_dict[model_id] = new_model
         # self.child_population.append(new_model)
         self.child_pop_size += 1
+        if self.extra:
+            self.existed_genotype.append(new_model_genotype)
 
     def remove_model(self, model_id):
         self.models_dict[model_id].mark_to_be_killed()

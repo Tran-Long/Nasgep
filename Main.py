@@ -18,7 +18,8 @@ transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-batch_size = 64
+batch_size = BATCH_SIZE
+DEVICE = "cpu"
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
@@ -29,10 +30,10 @@ classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # Step 1, 2
-normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = 10, max_size = 20)
-reduction_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = True, pop_size = 10, max_size = 20)
-reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, 3, reduction_adf_pop)
-model_pop = ModelPopulation(3, NUM_OF_CONSECUTIVE_NORMAL_CELL, normal_adf_pop, reduction_cell_pop)
+normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP)
+reduction_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP)
+reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, INIT_SIZE_CELL_POP, reduction_adf_pop)
+model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL, normal_adf_pop, reduction_cell_pop)
 # Step 3
 model_pop.train_population(train_loader, test_loader, model_pop.models_dict)
 num_generation = 10

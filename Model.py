@@ -19,7 +19,7 @@ class Model(nn.Module):
         # Select cells
         if normal_cell is None and reduction_cell is None:
             self.reduction_cell = r_cell_population.select_random_reduction_cell()
-            self.normal_cell = Cell(4, 5, n_adf_population)
+            self.normal_cell = Cell(n_adf_population)
         else:
             self.normal_cell = normal_cell
             self.reduction_cell = reduction_cell
@@ -64,6 +64,7 @@ class Model(nn.Module):
             self.all_module_block_list.append(nn.BatchNorm2d(current_input_channel))
             self.all_module_block_list.append(nn.Linear(64, 10))
         # Init optimizer and loss
+        self.num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         self.optimizer = torch.optim.SGD(self.parameters(), lr = 0.1)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = 5)
         self.criterion = nn.CrossEntropyLoss()

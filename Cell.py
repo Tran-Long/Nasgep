@@ -2,7 +2,7 @@ from ADFPopulation import *
 from BaseClass import *
 
 class Cell(BaseClass):
-    def __init__(self, cell_head, cell_tail, adf_population, reproduction_genotype=None):
+    def __init__(self, adf_population, cell_head=CELL_HEAD_LEN, cell_tail=CELL_TAIL_LEN, reproduction_genotype=None):
         super(Cell, self).__init__(cell_head, cell_tail)
         self.adf_population = adf_population
 
@@ -82,7 +82,7 @@ class Cell(BaseClass):
 
     def reproduction(self):
         new_genotype = self.reproduction_alone()
-        return Cell(self.head_size, self.tail_size, self.adf_population, new_genotype)
+        return Cell(self.adf_population, self.head_size, self.tail_size, new_genotype)
 
 # adf_pop = ADFPopulation(1, 2, for_reduction = False, pop_size = 10)
 # c = Cell(4, 5, adf_pop)
