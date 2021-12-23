@@ -58,7 +58,9 @@ class ADFPopulation(BasePopulation):
 
     def reproduction(self):
         num_of_new_adf = min(self.max_size - self.pop_size, MAX_CHILD_ADF)
-        assert num_of_new_adf >= MIN_CHILD_ADF, "Must create at least min = " + str(MIN_CHILD_ADF) + " child"
+        if num_of_new_adf < MIN_CHILD_ADF:
+            print("\tCreate no new adf")
+            return
         num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
         print("\tCreate " + str(num_of_new_adf) + " new adf")
         while self.child_pop_size < num_of_new_adf:

@@ -1,5 +1,7 @@
 
 import torch.nn as nn
+import torch.nn.init
+
 from Configs import *
 
 def create_file_name_conv(conv_term, in_channel, out_channel):
@@ -16,22 +18,51 @@ def conv_block (conv_term, in_channel, out_channel):
     if conv_type == "dep":
         assert in_channel == out_channel, "Depthwise cannot deal with different in/out"
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size, padding = "same", groups = in_channel))
+        if INIT_PARAMS == "He_normal":
+            torch.nn.init.kaiming_normal_(modules[-1].weight)
+        elif INIT_PARAMS == "He_uniform":
+            torch.nn.init.kaiming_uniform_(modules[-1].weight)
+
     elif conv_type == "sep":
         modules.append(nn.Conv2d(in_channel, in_channel, kernel_size, padding = "same", groups = in_channel))
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1)))
+        if INIT_PARAMS == "He_normal":
+            torch.nn.init.kaiming_normal_(modules[-1].weight)
+            torch.nn.init.kaiming_normal_(modules[-2].weight)
+        elif INIT_PARAMS == "He_uniform":
+            torch.nn.init.kaiming_uniform_(modules[-1].weight)
+            torch.nn.init.kaiming_uniform_(modules[-2].weight)
     elif conv_type == "isep":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1)))
         modules.append(nn.Conv2d(out_channel, out_channel, kernel_size, padding = "same", groups = out_channel))
+        if INIT_PARAMS == "He_normal":
+            torch.nn.init.kaiming_normal_(modules[-1].weight)
+            torch.nn.init.kaiming_normal_(modules[-2].weight)
+        elif INIT_PARAMS == "He_uniform":
+            torch.nn.init.kaiming_uniform_(modules[-1].weight)
+            torch.nn.init.kaiming_uniform_(modules[-2].weight)
     elif conv_type == "1stem":
         kernel_h, kernel_w = kernel_size
         padding_h = int((kernel_h-1)/2)
         padding_w = int((kernel_w-1)/2)
         # modules.append(nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2))
         modules = [nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2)]
+        if INIT_PARAMS == "He_normal":
+            torch.nn.init.kaiming_normal_(modules[-1].weight)
+        elif INIT_PARAMS == "He_uniform":
+            torch.nn.init.kaiming_uniform_(modules[-1].weight)
     elif conv_type == "pwbr":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1), stride = int(out_channel/in_channel)))
+        if INIT_PARAMS == "He_normal":
+            torch.nn.init.kaiming_normal_(modules[-1].weight)
+        elif INIT_PARAMS == "He_uniform":
+            torch.nn.init.kaiming_uniform_(modules[-1].weight)
     elif conv_type == "point":
         modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1)))
+        if INIT_PARAMS == "He_normal":
+            torch.nn.init.kaiming_normal_(modules[-1].weight)
+        elif INIT_PARAMS == "He_uniform":
+            torch.nn.init.kaiming_uniform_(modules[-1].weight)
     modules.append(nn.BatchNorm2d(out_channel))
     modules = nn.Sequential(*modules)
     return modules
