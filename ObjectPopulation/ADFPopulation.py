@@ -1,6 +1,6 @@
-from ADF import *
-from BasePopulation import *
-from Configs import *
+from ObjectPopulation.ADF import *
+from Base.BasePopulation import *
+from Utilities.Configs import *
 
 class ADFPopulation(BasePopulation):
     def __init__(self, head_size, tail_size, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, extra = False):
@@ -24,8 +24,8 @@ class ADFPopulation(BasePopulation):
         self.function_set = ADF_FUNCTION
         self.terminal_set = ADF_TERMINAL
 
-    def kill_bad_genes(self):
-        if T_G != -1:
+    def kill_bad_genes(self, t_g):
+        if t_g != -1:
             print("\tAdf pop consist: ")
             print("\t\t", end = "")
             print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
@@ -72,11 +72,3 @@ class ADFPopulation(BasePopulation):
         self.pop_size += self.child_pop_size
         self.child_population = []
         self.child_pop_size = 0
-
-
-# from Utils import *
-# from Cell import *
-# test_adf_pop = ADFPopulation(1, 2, pop_size = 10)
-# test_cell = Cell(4, 5, adf_population = test_adf_pop)
-# view_tree(test_cell.root)
-# view_tree_channel(test_cell.root)

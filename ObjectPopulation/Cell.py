@@ -1,5 +1,5 @@
-from ADFPopulation import *
-from BaseClass import *
+from ObjectPopulation.ADFPopulation import *
+from Base.BaseClass import *
 
 class Cell(BaseClass):
     def __init__(self, adf_population, cell_head=CELL_HEAD_LEN, cell_tail=CELL_TAIL_LEN, reproduction_genotype=None):

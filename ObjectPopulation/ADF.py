@@ -1,7 +1,5 @@
-import torch.nn as nn
 import numpy as np
-from Configs import *
-from Utils import *
+from Utilities.Utils import *
 
 class ADF:
     def __init__(self, adf_head=ADF_HEAD_LEN, adf_tail=ADF_TAIL_LEN, for_reduction=True, reproduction_genotype = None):
@@ -52,5 +50,4 @@ class ADF:
 
     def set_fitness(self, fitness):
         self.fitness = max(self.fitness, fitness)
-# temp = ADF()
-# view_tree(temp.root)
+

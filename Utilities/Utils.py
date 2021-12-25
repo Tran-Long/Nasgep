@@ -1,8 +1,7 @@
-
 import torch.nn as nn
 import torch.nn.init
 
-from Configs import *
+from Utilities.Configs import *
 
 def create_file_name_conv(conv_term, in_channel, out_channel):
     return conv_term + "_" + str(in_channel) + "_" + str(out_channel) + ".pth"

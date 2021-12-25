@@ -1,6 +1,6 @@
-from Cell import *
-from BasePopulation import *
-from Configs import *
+from ObjectPopulation.Cell import *
+from Base.BasePopulation import *
+from Utilities.Configs import *
 import numpy as np
 
 '''

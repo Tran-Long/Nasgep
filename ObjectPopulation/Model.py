@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from Cell import *
+from ObjectPopulation.Cell import *
 
 class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
@@ -16,6 +16,8 @@ class Model(nn.Module):
         self.mark_killed = False
         self.epoch_cnt = 0
         self.age = 0
+        self.training_status = True
+        self.drop_path_rate = DROP_PATH_RATE
         # Select cells
         if normal_cell is None and reduction_cell is None:
             self.reduction_cell = r_cell_population.select_random_reduction_cell()
@@ -65,7 +67,7 @@ class Model(nn.Module):
             self.all_module_block_list.append(nn.Linear(64, 10))
         # Init optimizer and loss
         self.num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
-        self.optimizer = torch.optim.SGD(self.parameters(), lr = 0.1)
+        self.optimizer = torch.optim.SGD(self.parameters(), lr = LR, momentum = MOMENTUM, weight_decay = WEIGHT_DECAY)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = 5)
         self.criterion = nn.CrossEntropyLoss()
 
@@ -78,7 +80,17 @@ class Model(nn.Module):
         elif root.value == "sum":
             left_value, nonce = self.cell_forward(root.left, prev_outputs, module_dict, nonce)
             right_value, nonce = self.cell_forward(root.right, prev_outputs, module_dict, nonce)
-            output = left_value + right_value
+            if self.training_status:
+                # local drop path
+                drop_mask = [1, 1]
+                if np.random.rand() < self.drop_path_rate:
+                    drop_mask[0] = 0
+                elif np.random.rand() < self.drop_path_rate:
+                    drop_mask[1] = 0
+                output = left_value * drop_mask[0] + right_value * drop_mask[1]
+                output /= self.drop_path_rate
+            else:
+                output = left_value + right_value
         elif root.value == "cat":
             left_value, nonce = self.cell_forward(root.left, prev_outputs, module_dict, nonce)
             right_value, nonce = self.cell_forward(root.right, prev_outputs, module_dict, nonce)

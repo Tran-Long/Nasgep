@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from Configs import *
+from Utilities.Configs import *
 
 class BaseClass:
     def __init__(self, head, tail):

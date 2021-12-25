@@ -1,4 +1,4 @@
-from Model import *
+from ObjectPopulation.Model import *
 
 # This population is kinda different from 2 previous populations
 class ModelPopulation:
@@ -71,35 +71,12 @@ class ModelPopulation:
         self.child_pop_size = 0
 
     @staticmethod
-    def test_population(test_loader, pop):
-        for (model_id, model) in pop.items():
-            print("----------------------")
-            print("Testing " + model_id)
-            total = 0
-            correct = 0
-            with torch.no_grad():
-                for data in test_loader:
-                    # inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
-                    inputs, labels = data[0], data[1]
-                    # calculate outputs by running images through the network
-                    outputs = model(inputs)
-                    # the class with the highest energy is what we choose as prediction
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
-            print("Current fitness = %.2f" % (correct/total * 100))
-
-            # model.fitness = max(model.fitness, correct/total * 100)
-            # model.set_fitness(correct/total * 100)
-            print((model_id + " fitness = %.2f %%") % model.fitness)
-            print("----------------------")
-
-    @staticmethod
-    def test_model(test_loader, model_id, model):
+    def test_model(val_loader, model_id, model):
+        model.training_status = False
         total = 0
         correct = 0
         with torch.no_grad():
-            for data in test_loader:
+            for data in val_loader:
                 # inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                 inputs, labels = data[0], data[1]
                 # calculate outputs by running images through the network
@@ -111,7 +88,7 @@ class ModelPopulation:
         model.set_fitness(correct / total * 100)
         print((model_id + " fitness = %.2f %%") % model.fitness)
 
-    def train_population(self, train_loader, test_loader, pop):
+    def train_population(self, train_loader, val_loader, pop):
         for (model_id, model) in pop.items():
             if not model.mark_killed:
                 model.epoch_cnt += 1
@@ -119,6 +96,7 @@ class ModelPopulation:
                     model.mark_to_be_killed()
                 print("-----------------------------")
                 print("\t\tTraining " + model_id + ".....", end = " ")
+                model.training_status = True
                 for i, data in enumerate(train_loader, 0):
                     # inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     inputs, labels = data[0], data[1]
@@ -133,14 +111,14 @@ class ModelPopulation:
                 # print("\t\tACCURACY: ", end = " ")
                 # self.test_model(train_loader, model_id, model)
                 print("\t\tVALIDATION: ", end = " ")
-                self.test_model(test_loader, model_id, model)
+                self.test_model(val_loader, model_id, model)
                 print("-------------------------------")
 
-    def evaluate_population_step_6(self, train_loader, test_loader, pop):
+    def evaluate_population_step_6(self, train_loader, test_loader, pop, t_c):
         self.train_population(train_loader, test_loader, pop)
-        if T_C != -1:
-            print("\t\t Base score for another epoch = " + str(T_C))
-            extra_models = {model_id: model for (model_id, model) in pop.items() if model.fitness >= T_C}
+        if t_c != -1:
+            print("\t\t Base score for another epoch = " + str(t_c))
+            extra_models = {model_id: model for (model_id, model) in pop.items() if model.fitness >= t_c}
             self.train_population(train_loader, test_loader, extra_models)
 
     def increase_age(self):

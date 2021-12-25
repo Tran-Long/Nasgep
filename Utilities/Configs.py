@@ -9,14 +9,17 @@ CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
 INIT_PARAMS = "He_normal"
 # INIT_PARAMS = "He_uniform"
 
-DATASET = "cifar-10"
-DEVICE = "cuda:0"
+"""LEARNING RATE & REGULARIZATION"""
+DROP_PATH_RATE = 0.1
+LR = 0.1
+WEIGHT_DECAY = 0.0005
+MOMENTUM = 0.9
 BATCH_SIZE = 512
 
-MAX_MODEL_PARAMS = 300000
+DATASET = "cifar-10"
+DEVICE = "cuda:0"
 
-T_G = -1
-T_C = -1
+MAX_MODEL_PARAMS = 300000
 
 """ADF & CELL Hyper params"""
 ADF_HEAD_LEN = 1
