@@ -4,8 +4,15 @@ from ObjectPopulation.Cell import *
 
 class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
-                 normal_cell=None, reduction_cell=None, for_dataset=DATASET):
+                 normal_cell=None, reduction_cell=None, for_dataset=DATASET, best_cell_genotypes = None):
         super(Model, self).__init__()
+        if best_cell_genotypes is not None:
+            normal_cell_genotypes = best_cell_genotypes[0]
+            for i in range(len(best_cell_genotypes)):
+                self.n_cell_roots_list.append(build_tree(normal_cell_genotypes[i]))
+            reduction_cell_genotype = best_cell_genotypes[1]
+            self.r_cell_roots_list.append(build_tree(reduction_cell_genotype))
+
         self.adf_population = n_adf_population  # for normal cell making
         self.cell_population = r_cell_population  # for reduction cell making
         self.all_module_block_list = nn.ModuleList()
@@ -19,12 +26,13 @@ class Model(nn.Module):
         self.training_status = True
         self.drop_path_rate = DROP_PATH_RATE
         # Select cells
-        if normal_cell is None and reduction_cell is None:
-            self.reduction_cell = r_cell_population.select_random_reduction_cell()
-            self.normal_cell = Cell(n_adf_population)
-        else:
-            self.normal_cell = normal_cell
-            self.reduction_cell = reduction_cell
+        if best_cell_genotypes is None:
+            if normal_cell is None and reduction_cell is None:
+                self.reduction_cell = r_cell_population.select_random_reduction_cell()
+                self.normal_cell = Cell(n_adf_population)
+            else:
+                self.normal_cell = normal_cell
+                self.reduction_cell = reduction_cell
         """--------------------------------------------"""
         # print("\t\t\t", end = "")
         # print(self.normal_cell.genotype)
@@ -36,30 +44,35 @@ class Model(nn.Module):
         current_input_channel = 3
         prev_outputs = []
         if for_dataset == "cifar-10":
-            self.n_cell_list = []
-            self.r_cell_list = []
+            if best_cell_genotypes is None:
+                self.n_cell_roots_list = []
+                self.r_cell_roots_list = []
             self.all_module_block_list.append(nn.ModuleList([conv_block(STEM_TERM, current_input_channel, NUM_CHANNELS)]))
             current_input_channel = 16
             prev_outputs.append(0)
 
             # 1st normal block => channel = 16
             for i in range(n):
-                self.n_cell_list.append(copy.deepcopy(self.normal_cell))
-                module_dict, path_dict = self.n_cell_list[i].create_modules_dict(prev_outputs, current_input_channel)
+                temp_cell = copy.deepcopy(self.normal_cell)
+                module_dict, path_dict = temp_cell.create_modules_dict(prev_outputs, current_input_channel)
+                if best_cell_genotypes is None:
+                    self.n_cell_roots_list.append(temp_cell.root)
                 self.all_module_block_list.append(module_dict)
                 self.all_cell_file_list.append(path_dict)
                 prev_outputs.append(0)
 
             for k in range(2):
                 current_input_channel *= 2
-                if len(self.r_cell_list) == 0:
-                    self.r_cell_list.append(copy.deepcopy(self.reduction_cell))
-                module_dict, path_dict = self.r_cell_list[0].create_modules_dict(prev_outputs, current_input_channel)
+                temp_cell = copy.deepcopy(self.reduction_cell)
+                module_dict, path_dict = temp_cell.create_modules_dict(prev_outputs, current_input_channel)
+                if len(self.r_cell_roots_list) == 0:
+                    self.r_cell_roots_list.append(temp_cell.root)
                 self.all_module_block_list.append(module_dict)
                 self.all_cell_file_list.append(path_dict)
                 prev_outputs = [0]
                 for i in range(n):
-                    module_dict, path_dict = self.n_cell_list[i].create_modules_dict(prev_outputs, current_input_channel)
+                    temp_cell = copy.deepcopy(self.normal_cell)
+                    module_dict, path_dict = temp_cell.create_modules_dict(prev_outputs, current_input_channel)
                     self.all_module_block_list.append(module_dict)
                     self.all_cell_file_list.append(path_dict)
                     prev_outputs.append(0)
@@ -110,18 +123,18 @@ class Model(nn.Module):
             for i in range(self.n):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
-                output, _ = self.cell_forward(self.n_cell_list[i].root, prev_outputs, module_dict, nonce = 0)
+                output, _ = self.cell_forward(self.n_cell_roots_list[i], prev_outputs, module_dict, nonce = 0)
                 prev_outputs.append(output)
 
             for k in range(2):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
-                output, _ = self.cell_forward(self.r_cell_list[0].root, prev_outputs, module_dict, nonce = 0)
+                output, _ = self.cell_forward(self.r_cell_roots_list[0], prev_outputs, module_dict, nonce = 0)
                 prev_outputs = [output]
                 for i in range(self.n):
                     blk_idx += 1
                     module_dict = self.all_module_block_list[blk_idx]
-                    output, _ = self.cell_forward(self.n_cell_list[i].root, prev_outputs, module_dict, nonce = 0)
+                    output, _ = self.cell_forward(self.n_cell_roots_list[i], prev_outputs, module_dict, nonce = 0)
                     prev_outputs.append(output)
 
             blk_idx += 1
@@ -148,7 +161,6 @@ class Model(nn.Module):
     def show_info(self):
         print("\t\tModel info: ")
         print("\t\tNormal root info: ")
-        for i in range(self.n):
-            view_tree(self.n_cell_list[i].root)
+        view_tree(self.normal_cell.root)
         print("\t\tReduction root info: ")
-        view_tree(self.r_cell_list[0].root)
+        view_tree(self.reduction_cell.root)

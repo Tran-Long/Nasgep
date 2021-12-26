@@ -188,6 +188,50 @@ def build_tree_cell(genotype, adfs_dict):
     root = expand_tree_cell(root, adfs_dict)
     return root
 
+def build_tree(genotype):
+    root = Node(genotype[0])
+    i = 1
+    this_level = [root]
+    appendable = True
+    while appendable and i < len(genotype):
+        appendable = False
+        next_level = []
+        for node in this_level:
+            if node.value == "sum" or node.value == "cat":
+                appendable = True
+                if i < len(genotype):
+                    node.left = Node(genotype[i])
+                    i = i + 1
+                    next_level.append(node.left)
+                if i < len(genotype):
+                    node.right = Node(genotype[i])
+                    i = i + 1
+                    next_level.append(node.right)
+            elif node.value in CONV_TERMS or node.value == POINT_WISE_TERM or node.value == POINT_WISE_BEFORE_REDUCTION_TERM:
+                appendable = True
+                if i < len(genotype):
+                    node.left = Node(genotype[i])
+                    i = i + 1
+                    next_level.append(node.left)
+        this_level = next_level
+    return root
+
+def bfs(root):
+    r = root
+    result = []
+    queue = []
+    result.append(r.value)
+    queue.append(r)
+    while queue:          # Creating loop to visit each node
+        m = queue.pop(0)
+        if m.left is not None:
+            result.append(m.left.value)
+            queue.append(m.left)
+        if m.right is not None:
+            result.append(m.right.value)
+            queue.append(m.right)
+    return result
+
 def view_tree(t):
     t_level = [t]
     while len(t_level) > 0:
@@ -222,3 +266,5 @@ def view_model_info(model_id, model):
     print(model.normal_cell.genotype)
     print("\t\t", end = "")
     print(model.reduction_cell.genotype)
+
+

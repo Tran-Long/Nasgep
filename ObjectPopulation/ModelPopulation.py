@@ -186,7 +186,14 @@ class ModelPopulation:
         print("There are " + str(len(max_fitness_model_id)) + " best models")
         best_models = []
         for model_id in max_fitness_model_id:
-            best_models.append(self.models_dict[model_id])
-            best_models[-1].show_info()
-            print("\n\n")
+            best_model = self.models_dict[model_id]
+            print("\n")
+            best_model.show_info()
+            zip_model_info = []
+            normal_genotypes = []
+            for root in best_model.n_cell_roots_list:
+                normal_genotypes.append(bfs(root))
+            zip_model_info.append(normal_genotypes)
+            zip_model_info.append(bfs(best_model.r_cell_roots_list[0]))
+            best_models.append(zip_model_info)
         return best_models
