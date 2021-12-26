@@ -84,6 +84,10 @@ class BaseClass:
     def reproduction_alone(self):
         genotype = self.replication(self.genotype)
         genotype = self.mutation(genotype)
-        genotype = self.transposition(genotype)
-        genotype = self.root_transposition(genotype)
+        if ENABLE_TRANSPOSITION:
+            genotype = self.transposition(genotype)
+            genotype = self.root_transposition(genotype)
+        else:
+            for i in range(2):
+                genotype = self.mutation(genotype)
         return genotype

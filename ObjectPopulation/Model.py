@@ -45,21 +45,21 @@ class Model(nn.Module):
             # 1st normal block => channel = 16
             for i in range(n):
                 self.n_cell_list.append(copy.deepcopy(self.normal_cell))
-                module_dict, path_dict = self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel)
+                module_dict, path_dict = self.n_cell_list[i].create_modules_dict(prev_outputs, current_input_channel)
                 self.all_module_block_list.append(module_dict)
                 self.all_cell_file_list.append(path_dict)
                 prev_outputs.append(0)
 
             for k in range(2):
                 current_input_channel *= 2
-                self.r_cell_list.append(copy.deepcopy(self.reduction_cell))
-                module_dict, path_dict = self.r_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel)
+                if len(self.r_cell_list) == 0:
+                    self.r_cell_list.append(copy.deepcopy(self.reduction_cell))
+                module_dict, path_dict = self.r_cell_list[0].create_modules_dict(prev_outputs, current_input_channel)
                 self.all_module_block_list.append(module_dict)
                 self.all_cell_file_list.append(path_dict)
                 prev_outputs = [0]
                 for i in range(n):
-                    self.n_cell_list.append(copy.deepcopy(self.normal_cell))
-                    module_dict, path_dict = self.n_cell_list[-1].create_modules_dict(prev_outputs, current_input_channel)
+                    module_dict, path_dict = self.n_cell_list[i].create_modules_dict(prev_outputs, current_input_channel)
                     self.all_module_block_list.append(module_dict)
                     self.all_cell_file_list.append(path_dict)
                     prev_outputs.append(0)
@@ -102,8 +102,6 @@ class Model(nn.Module):
     def forward(self, x):
         if self.for_dataset == "cifar-10":
             blk_idx = 0
-            n_cell_idx = 0
-            r_cell_idx = 0
             output = x
             prev_outputs = []
             for layer in self.all_module_block_list[blk_idx]:
@@ -112,21 +110,18 @@ class Model(nn.Module):
             for i in range(self.n):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
-                output, _ = self.cell_forward(self.n_cell_list[n_cell_idx].root, prev_outputs, module_dict, nonce = 0)
-                n_cell_idx += 1
+                output, _ = self.cell_forward(self.n_cell_list[i].root, prev_outputs, module_dict, nonce = 0)
                 prev_outputs.append(output)
 
             for k in range(2):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]
-                output, _ = self.cell_forward(self.r_cell_list[r_cell_idx].root, prev_outputs, module_dict, nonce = 0)
-                r_cell_idx += 1
+                output, _ = self.cell_forward(self.r_cell_list[0].root, prev_outputs, module_dict, nonce = 0)
                 prev_outputs = [output]
                 for i in range(self.n):
                     blk_idx += 1
                     module_dict = self.all_module_block_list[blk_idx]
-                    output, _ = self.cell_forward(self.n_cell_list[n_cell_idx].root, prev_outputs, module_dict, nonce = 0)
-                    n_cell_idx += 1
+                    output, _ = self.cell_forward(self.n_cell_list[i].root, prev_outputs, module_dict, nonce = 0)
                     prev_outputs.append(output)
 
             blk_idx += 1
@@ -149,3 +144,11 @@ class Model(nn.Module):
         self.mark_killed = True
         self.normal_cell.mark_to_be_killed()
         self.reduction_cell.mark_to_be_killed()
+
+    def show_info(self):
+        print("\t\tModel info: ")
+        print("\t\tNormal root info: ")
+        for i in range(self.n):
+            view_tree(self.n_cell_list[i].root)
+        print("\t\tReduction root info: ")
+        view_tree(self.r_cell_list[0].root)

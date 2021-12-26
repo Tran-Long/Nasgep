@@ -179,3 +179,14 @@ class ModelPopulation:
         print("\tModels left: ")
         print("\t\t", end = "")
         print(self.models_dict.keys())
+
+    def get_best_models(self):
+        max_fitness = max([self.models_dict[model_id].fitness for model_id in list(self.models_dict.keys())])
+        max_fitness_model_id = [model_id for model_id in list(self.models_dict.keys()) if self.models_dict[model_id].fitness == max_fitness]
+        print("There are " + str(len(max_fitness_model_id)) + " best models")
+        best_models = []
+        for model_id in max_fitness_model_id:
+            best_models.append(self.models_dict[model_id])
+            best_models[-1].show_info()
+            print("\n\n")
+        return best_models

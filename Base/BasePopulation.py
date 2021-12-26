@@ -163,10 +163,11 @@ class BasePopulation:
         genotype_dad = self.replication(genotype_dad)
         genotype_mom = self.mutation(genotype_mom)
         genotype_dad = self.mutation(genotype_dad)
-        genotype_mom = self.transposition(genotype_mom)
-        genotype_dad = self.transposition(genotype_dad)
-        genotype_mom = self.root_transposition(genotype_mom)
-        genotype_dad = self.root_transposition(genotype_dad)
+        if ENABLE_TRANSPOSITION:
+            genotype_mom = self.transposition(genotype_mom)
+            genotype_dad = self.transposition(genotype_dad)
+            genotype_mom = self.root_transposition(genotype_mom)
+            genotype_dad = self.root_transposition(genotype_dad)
         genotype_mom, genotype_dad = self.one_point_recombination(genotype_dad, genotype_mom)
         genotype_mom, genotype_dad = self.two_point_recombination(genotype_dad, genotype_mom)
         return genotype_mom, genotype_dad

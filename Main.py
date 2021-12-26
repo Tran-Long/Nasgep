@@ -28,7 +28,10 @@ batch_size = BATCH_SIZE
 DEVICE = "cpu"
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
-train_dataset, val_dataset = torch.utils.data.random_split(train_set, [45000, 5000])
+train_dataset, _ = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
+train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=test_transform)
+_, val_dataset = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
+
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
