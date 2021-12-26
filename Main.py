@@ -6,6 +6,7 @@ from ObjectPopulation.Cell import *
 from Utilities.Configs import *
 from DataPreprocessing.Cutout import *
 from DataPreprocessing.AutoAugment import *
+import time
 
 normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                  std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
@@ -15,8 +16,8 @@ train_transform = transforms.Compose([
     transforms.RandomHorizontalFlip(),
     CIFAR10Policy(),
     transforms.ToTensor(),
-    normalize,
-    Cutout(n_holes = 1, length = 16)
+    Cutout(n_holes = 1, length = 16),
+    normalize
 ])
 
 test_transform = transforms.Compose([
@@ -51,8 +52,14 @@ model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL,
 model_pop.train_population(train_loader, val_loader, model_pop.models_dict)
 num_generation = 10
 year = 0
+timeout = time.time() + 60*60*3
 while year <= 2:
+    if time.time() > timeout:
+        break
     year += 1
+    print("****************************")
+    print("*********   "+ str(year) +"  **************")
+    print("****************************")
     # Step 4
     print("*****Step 4 - kill bad gene*****")
     normal_adf_pop.kill_bad_genes(T_G)
@@ -78,3 +85,12 @@ while year <= 2:
     T_C = 0.75*T_G
     print("\tUpdated T_G, T_C:\t", end = "")
     print("T_G = %.2f, T_C = %.2f" % (T_G, T_C))
+
+best_model_genotypes = model_pop.get_best_models()
+for model_genotype in best_model_genotypes:
+    n_genotypes = model_genotype[0]
+    for n_geno in n_genotypes:
+        print(n_geno)
+    r_genotype = model_genotype[1]
+    print(r_genotype)
+    print("\n")

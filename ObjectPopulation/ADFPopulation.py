@@ -29,7 +29,7 @@ class ADFPopulation(BasePopulation):
             print("\tAdf pop consist: ")
             print("\t\t", end = "")
             print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
-            adf_id_to_remove = [adf_id for (adf_id, adf) in self.adfs_dict.items() if adf.fitness != -1 and adf.is_used == 0 and adf.fitness < T_G]
+            adf_id_to_remove = [adf_id for (adf_id, adf) in self.adfs_dict.items() if adf.fitness != -1 and adf.is_used == 0 and adf.fitness < t_g]
             for adf_id in adf_id_to_remove:
                 self.remove_adf(adf_id)
             print("\tAdf left: ")
