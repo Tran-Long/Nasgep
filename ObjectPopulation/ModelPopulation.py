@@ -33,7 +33,8 @@ class ModelPopulation:
         print("\t\t", end="")
         print(self.models_dict.keys())
         for (model_id, model) in self.models_dict.items():
-            self.add_model(model.normal_cell)
+            if not model.mark_killed:
+                self.add_model(model.normal_cell)
         print("\tAfter:")
         print("\t\t", end="")
         print(self.models_dict.keys(), end = " ")

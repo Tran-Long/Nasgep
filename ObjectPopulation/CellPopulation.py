@@ -38,8 +38,6 @@ class CellPopulation(BasePopulation):
 
     def remove_cell(self, cell_id):
         cell_idx_in_list = self.keys_list.index(cell_id)
-        for adf_id in self.cells_dict[cell_id].adfs_dict:
-            self.cells_dict[cell_id].adfs_dict[adf_id].is_used -= 1
         self.cells_dict.pop(cell_id)
         self.keys_list.pop(cell_idx_in_list)
         self.population.pop(cell_idx_in_list)

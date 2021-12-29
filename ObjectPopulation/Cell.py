@@ -79,6 +79,8 @@ class Cell(BaseClass):
 
     def mark_to_be_killed(self):
         self.mark_killed = True
+        for adf_id in self.adfs_dict:
+            self.adfs_dict[adf_id].is_used -= 1
 
     def reproduction(self):
         new_genotype = self.reproduction_alone()
