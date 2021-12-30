@@ -48,6 +48,10 @@ class BaseClass:
                     genotype.insert(target_site, item)
                 for i in range(transposon_length):
                     genotype.pop(self.head_size)
+
+                for i in range(self.head_size):
+                    if genotype[i] not in self.function_set:
+                        genotype[i] = np.random.choice(self.function_set)
         return genotype
 
     def root_transposition (self, genotype, rate = RPD_CELL_ROOT_TRANSPOSITION_RATE, ris_elements_cnt = RPD_RIS_ELE_CNT):
@@ -79,15 +83,14 @@ class BaseClass:
                     genotype.insert(0, item)
                 for i in range(transposon_length):
                     genotype.pop(self.head_size)
+            for i in range(self.head_size):
+                if genotype[i] not in self.function_set:
+                    genotype[i] = np.random.choice(self.function_set)
         return genotype
 
     def reproduction_alone(self):
         genotype = self.replication(self.genotype)
         genotype = self.mutation(genotype)
-        if ENABLE_TRANSPOSITION:
-            genotype = self.transposition(genotype)
-            genotype = self.root_transposition(genotype)
-        else:
-            for i in range(2):
-                genotype = self.mutation(genotype)
+        genotype = self.transposition(genotype)
+        genotype = self.root_transposition(genotype)
         return genotype

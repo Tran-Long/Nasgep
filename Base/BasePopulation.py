@@ -83,6 +83,9 @@ class BasePopulation:
                     genotype.insert(target_site, item)
                 for i in range(transposon_length):
                     genotype.pop(self.head_size)
+                for i in range(self.head_size):
+                    if genotype[i] not in self.function_set:
+                        genotype[i] = np.random.choice(self.function_set)
         return genotype
 
     def root_transposition (self, genotype, rate = RPD_ROOT_TRANSPOSITION_RATE, ris_elements_cnt = RPD_RIS_ELE_CNT):
@@ -114,6 +117,10 @@ class BasePopulation:
                     genotype.insert(0, item)
                 for i in range(transposon_length):
                     genotype.pop(self.head_size)
+
+            for i in range(self.head_size):
+                if genotype[i] not in self.function_set:
+                    genotype[i] = np.random.choice(self.function_set)
         return genotype
 
     def one_point_recombination (self, genotype_dad, genotype_mom, rate = RPD_1_RECOMBINATION_RATE):
@@ -163,11 +170,10 @@ class BasePopulation:
         genotype_dad = self.replication(genotype_dad)
         genotype_mom = self.mutation(genotype_mom)
         genotype_dad = self.mutation(genotype_dad)
-        if ENABLE_TRANSPOSITION:
-            genotype_mom = self.transposition(genotype_mom)
-            genotype_dad = self.transposition(genotype_dad)
-            genotype_mom = self.root_transposition(genotype_mom)
-            genotype_dad = self.root_transposition(genotype_dad)
+        genotype_mom = self.transposition(genotype_mom)
+        genotype_dad = self.transposition(genotype_dad)
+        genotype_mom = self.root_transposition(genotype_mom)
+        genotype_dad = self.root_transposition(genotype_dad)
         genotype_mom, genotype_dad = self.one_point_recombination(genotype_dad, genotype_mom)
         genotype_mom, genotype_dad = self.two_point_recombination(genotype_dad, genotype_mom)
         return genotype_mom, genotype_dad
