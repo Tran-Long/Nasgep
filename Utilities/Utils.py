@@ -214,6 +214,11 @@ def build_tree(genotype):
                     i = i + 1
                     next_level.append(node.left)
         this_level = next_level
+    calculate_channel_mul(root)
+    if root.channel > 1:
+        new_root_pw = Node(POINT_WISE_TERM, channel = 1)
+        new_root_pw.left = root
+        root = new_root_pw
     return root
 
 def bfs(root):

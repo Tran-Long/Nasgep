@@ -6,12 +6,18 @@ class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
                  normal_cell=None, reduction_cell=None, for_dataset=DATASET, best_cell_genotypes = None):
         super(Model, self).__init__()
+        self.n_cell_roots_list = []
+        self.r_cell_roots_list = []
         if best_cell_genotypes is not None:
             normal_cell_genotypes = best_cell_genotypes[0]
             for i in range(len(best_cell_genotypes)):
                 self.n_cell_roots_list.append(build_tree(normal_cell_genotypes[i]))
             reduction_cell_genotype = best_cell_genotypes[1]
             self.r_cell_roots_list.append(build_tree(reduction_cell_genotype))
+            self.normal_cell = Cell(n_adf_population, reproduction_genotype = ["sum", "sum", "cat", "cat"])
+            self.normal_cell.root = self.n_cell_roots_list[0]
+            self.reduction_cell = Cell(n_adf_population, reproduction_genotype = ["sum", "sum", "cat", "cat"])
+            self.reduction_cell.root = self.r_cell_roots_list[0]
 
         self.adf_population = n_adf_population  # for normal cell making
         self.cell_population = r_cell_population  # for reduction cell making
@@ -44,9 +50,6 @@ class Model(nn.Module):
         current_input_channel = 3
         prev_outputs = []
         if for_dataset == "cifar-10":
-            if best_cell_genotypes is None:
-                self.n_cell_roots_list = []
-                self.r_cell_roots_list = []
             self.all_module_block_list.append(nn.ModuleList([conv_block(STEM_TERM, current_input_channel, NUM_CHANNELS)]))
             current_input_channel = 16
             prev_outputs.append(0)
