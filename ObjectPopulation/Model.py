@@ -6,19 +6,6 @@ class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
                  normal_cell=None, reduction_cell=None, for_dataset=DATASET, best_cell_genotypes = None):
         super(Model, self).__init__()
-        self.n_cell_roots_list = []
-        self.r_cell_roots_list = []
-        if best_cell_genotypes is not None:
-            normal_cell_genotypes = best_cell_genotypes[0]
-            for i in range(len(best_cell_genotypes)):
-                self.n_cell_roots_list.append(build_tree(normal_cell_genotypes[i]))
-            reduction_cell_genotype = best_cell_genotypes[1]
-            self.r_cell_roots_list.append(build_tree(reduction_cell_genotype))
-            self.normal_cell = Cell(n_adf_population, reproduction_genotype = ["sum", "sum", "cat", "cat"])
-            self.normal_cell.root = self.n_cell_roots_list[0]
-            self.reduction_cell = Cell(n_adf_population, reproduction_genotype = ["sum", "sum", "cat", "cat"])
-            self.reduction_cell.root = self.r_cell_roots_list[0]
-
         self.adf_population = n_adf_population  # for normal cell making
         self.cell_population = r_cell_population  # for reduction cell making
         self.all_module_block_list = nn.ModuleList()
@@ -32,19 +19,29 @@ class Model(nn.Module):
         self.training_status = True
         self.drop_path_rate = DROP_PATH_RATE
         # Select cells
-        if best_cell_genotypes is None:
-            if normal_cell is None and reduction_cell is None:
-                self.reduction_cell = r_cell_population.select_random_reduction_cell()
-                self.normal_cell = Cell(n_adf_population)
-            else:
-                self.normal_cell = normal_cell
-                self.reduction_cell = reduction_cell
+        if normal_cell is None and reduction_cell is None:
+            self.reduction_cell = r_cell_population.select_random_reduction_cell()
+            self.normal_cell = Cell(n_adf_population)
+        else:
+            self.normal_cell = normal_cell
+            self.reduction_cell = reduction_cell
         """--------------------------------------------"""
         # print("\t\t\t", end = "")
         # print(self.normal_cell.genotype)
         # print("\t\t\t", end = "")
         # print(self.reduction_cell.genotype)
         """--------------------------------------------"""
+
+        self.n_cell_roots_list = []
+        self.r_cell_roots_list = []
+        if best_cell_genotypes is not None:
+            normal_cell_genotypes = best_cell_genotypes[0]
+            for i in range(n):
+                self.n_cell_roots_list.append(build_tree(normal_cell_genotypes[i]))
+            reduction_cell_genotype = best_cell_genotypes[1]
+            self.r_cell_roots_list.append(build_tree(reduction_cell_genotype))
+            self.normal_cell.root = self.n_cell_roots_list[0]
+            self.reduction_cell.root = self.r_cell_roots_list[0]
 
         # Init network representation
         current_input_channel = 3
@@ -121,8 +118,8 @@ class Model(nn.Module):
             output = x
             prev_outputs = []
             for layer in self.all_module_block_list[blk_idx]:
-                output = layer(x)
-                prev_outputs.append(output)
+                output = layer(output)
+            prev_outputs.append(output)
             for i in range(self.n):
                 blk_idx += 1
                 module_dict = self.all_module_block_list[blk_idx]

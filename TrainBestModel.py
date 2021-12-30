@@ -1,4 +1,5 @@
 from ObjectPopulation.Model import *
+from ObjectPopulation.CellPopulation import *
 import torchvision.transforms as transforms
 import torchvision
 from DataPreprocessing.Cutout import *
@@ -32,8 +33,16 @@ test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuff
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
+normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP)
+reduction_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP)
+reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, INIT_SIZE_CELL_POP, reduction_adf_pop)
+n_cell1 = ["cat", "cat", "cat", "sum", "sep_7x1", "isep_1x7", "sum", "dep_5x5", "sum", 0, "sep_5x5", "dep_5x5", 0, "dep_1x7", 0, "dep_7x1", 0, 0, 0, 0]
+n_cell2 = ["cat", "cat", "cat", "sum", "sep_7x1", "isep_1x7", "sum", "dep_5x5", "sum", 0, "sep_5x5", "dep_5x5", 0, "dep_1x7", 0, "dep_7x1", 1, 0, 1, 1]
+n_cell3 = ["cat", "cat", "cat", "sum", "sep_7x1", "isep_1x7", "sum", "dep_5x5", "sum", 1, "sep_5x5", "dep_5x5", 1, "dep_1x7", 1, "dep_7x1", 2, 1, 2, 2]
+r_cell = ["cat", "cat", "sum", "cat", "sum", "sep_1x7", "isep_1x7", "sum", "isep_3x3", "sep_1x7", "sep_1x7", "isep_5x5", "isep_7x1", "isep_3x3", "sep_3x3", "sep_5x5", "pwbr_1x1", "pwbr_1x1", "pwbr_1x1", "pwbr_1x1", "pwbr_1x1", "pwbr_1x1", "pwbr_1x1", 3, 3, 3, 3, 3, 2, 3]
+
 # TODO: add models genotype [[n_cell1, n_cell2, n_cell3], r_cell]
-model = Model(None, None, best_cell_genotypes = [])
+model = Model(normal_adf_pop, reduction_cell_pop, best_cell_genotypes = [[n_cell1, n_cell2, n_cell3], r_cell])
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.025, momentum=0.9, weight_decay = 0.0005)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 5)
@@ -65,7 +74,6 @@ print('Finished Training')
 
 correct = 0
 total = 0
-# since we're not training, we don't need to calculate the gradients for our outputs
 with torch.no_grad():
     for data in test_loader:
         images, labels = data
