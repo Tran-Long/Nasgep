@@ -146,6 +146,12 @@ def calculate_channel_mul(root):
         else:
             root.channel = left_channel
         return root.channel
+    # This part for best model :V
+    if root.value == POINT_WISE_TERM:
+        calculate_channel_mul(root.left)
+        root.channel = 1
+        return root.channel
+    # else other convolution
     root.channel = 1
     return root.channel
 
