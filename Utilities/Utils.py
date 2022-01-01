@@ -284,7 +284,7 @@ def view_model_info(model_id, model):
 def get_string_fr_arr(arr):
     string = "["
     for ele in arr:
-        string += ele + ", "
+        string += str(ele) + ", "
     string += "]"
     return string
 
