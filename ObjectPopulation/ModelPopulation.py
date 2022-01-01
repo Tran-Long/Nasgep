@@ -22,7 +22,7 @@ class ModelPopulation:
             view_model_info(model_id, new_model)
             """"""
             self.models_dict[model_id] = new_model
-            # self.models_dict[model_id].to(DEVICE)
+            self.models_dict[model_id].to(DEVICE)
         self.population = list(self.models_dict.values())
         self.child_models_dict = {}
         self.child_pop_size = 0
@@ -67,7 +67,7 @@ class ModelPopulation:
         view_model_info(model_id, new_model)
         """"""
         self.nonce += 1
-        # new_model.to(DEVICE)
+        new_model.to(DEVICE)
         self.child_models_dict[model_id] = new_model
         # self.child_population.append(new_model)
         self.child_pop_size += 1
@@ -90,8 +90,8 @@ class ModelPopulation:
         correct = 0
         with torch.no_grad():
             for data in val_loader:
-                # inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
-                inputs, labels = data[0], data[1]
+                inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
+                # inputs, labels = data[0], data[1]
                 # calculate outputs by running images through the network
                 outputs = model(inputs)
                 # the class with the highest energy is what we choose as prediction
@@ -114,8 +114,8 @@ class ModelPopulation:
                 write_log("Training " + model_id + ".....")
                 model.training_status = True
                 for i, data in enumerate(train_loader, 0):
-                    # inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
-                    inputs, labels = data[0], data[1]
+                    inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
+                    # inputs, labels = data[0], data[1]
                     model.zero_grad()
                     outputs = model(inputs)
                     loss = model.criterion(outputs, labels)
