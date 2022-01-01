@@ -7,7 +7,9 @@ CONV_TERMS = ['dep_3x3', 'dep_5x5', 'dep_3x5', 'dep_5x3', 'dep_1x7', 'dep_7x1',
 
 BEST_ACC_CONV = {conv: 0 for conv in CONV_TERMS}
 CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
-LOG_FILE = os.path.join(os.path.dirname(os.getcwd()), "log.txt")
+# LOG_FILE = os.path.join(os.path.dirname(os.getcwd()), "log.txt")
+"""**Drive path***"""
+LOG_FILE = "/content/MyDrive/MyDrive/Colab Notebooks/Nasgep/Nasgep/log.txt"
 
 # INIT_PARAMS = "He_normal"
 INIT_PARAMS = "He_uniform"

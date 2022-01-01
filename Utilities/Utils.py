@@ -290,7 +290,7 @@ def get_string_fr_arr(arr):
 
 def write_log(data):
     f = open(LOG_FILE, "a")
-    f.write(data)
+    f.write(data + "\n")
     f.close()
 
 def create_file():
