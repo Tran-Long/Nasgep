@@ -52,19 +52,29 @@ class CellPopulation(BasePopulation):
     def reproduction(self):
         """ Function only for reduction cell population """
         print("\tBefore:")
+        write_log("Before: ")
         print("\t\t", end = "")
         print(self.keys_list)
+        write_log(self.get_info_string())
         while self.child_pop_size < self.pop_size:
             new_cell_genotype1, new_cell_genotype2 = self.reproduction_individual_genotype()
             self.add_cell(new_cell_genotype1)
             self.add_cell(new_cell_genotype2)
         self.merge_population()
         print("\tAfter:")
+        write_log("After: ")
         print("\t\t", end = "")
         print(self.keys_list)
+        write_log(self.get_info_string())
 
     def remove_marked_kill_cell(self):
         cell_id_to_kill = [cell_id for (cell_id, cell) in self.cells_dict.items() if cell.mark_killed == True]
         for cell_id in cell_id_to_kill:
             self.remove_cell(cell_id)
 
+    def get_info_string(self):
+        string = "["
+        for cell_id in self.keys_list:
+            string += cell_id + ", "
+        string += "]"
+        return string

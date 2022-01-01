@@ -86,9 +86,5 @@ class Cell(BaseClass):
         new_genotype = self.reproduction_alone()
         return Cell(self.adf_population, self.head_size, self.tail_size, new_genotype)
 
-# adf_pop = ADFPopulation(1, 2, for_reduction = False, pop_size = 10)
-# c = Cell(4, 5, adf_pop)
-# c1 = c.reproduction()
-# print(c.adfs_dict.keys())
-# print(c1.adfs_dict.keys())
+
 

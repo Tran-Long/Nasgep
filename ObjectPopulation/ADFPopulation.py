@@ -27,14 +27,18 @@ class ADFPopulation(BasePopulation):
     def kill_bad_genes(self, t_g):
         if t_g != -1:
             print("\tAdf pop consist: ")
+            write_log("Adf pop consist: ")
             print("\t\t", end = "")
             print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
+            write_log(self.get_info_string())
             adf_id_to_remove = [adf_id for (adf_id, adf) in self.adfs_dict.items() if adf.fitness != -1 and adf.is_used == 0 and adf.fitness < t_g]
             for adf_id in adf_id_to_remove:
                 self.remove_adf(adf_id)
             print("\tAdf left: ")
+            write_log("Adf left: ")
             print("\t\t", end = "")
             print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
+            write_log(self.get_info_string())
 
     def add_adf(self, adf_genotype):
         adf = ADF(for_reduction = self.for_reduction, reproduction_genotype = adf_genotype)
@@ -60,9 +64,11 @@ class ADFPopulation(BasePopulation):
         num_of_new_adf = min(self.max_size - self.pop_size, MAX_CHILD_ADF)
         if num_of_new_adf < MIN_CHILD_ADF:
             print("\tCreate no new adf")
+            write_log("Create no new adf")
             return
         num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
         print("\tCreate " + str(num_of_new_adf) + " new adf")
+        write_log("Create " + str(num_of_new_adf) + " new adf")
         while self.child_pop_size < num_of_new_adf:
             new_adf_genotype_1, new_adf_genotype_2 = self.reproduction_individual_genotype()
             self.add_adf(new_adf_genotype_1)
@@ -72,3 +78,10 @@ class ADFPopulation(BasePopulation):
         self.pop_size += self.child_pop_size
         self.child_population = []
         self.child_pop_size = 0
+
+    def get_info_string(self):
+        string = "{"
+        for (adf_id, adf) in self.adfs_dict.items():
+            string += adf_id + ": (" + str(adf.fitness) + ", " + str(adf.is_used) + "; "
+        string += "}"
+        return string

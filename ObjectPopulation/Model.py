@@ -160,7 +160,12 @@ class Model(nn.Module):
 
     def show_info(self):
         print("\t\tModel info: ")
+        write_log("Model info: ")
         print("\t\tNormal root info: ")
+        write_log("Normal root info: ")
         view_tree(self.normal_cell.root)
+        write_log(get_string_fr_arr(self.normal_cell.genotype))
         print("\t\tReduction root info: ")
+        write_log("Reduction root info: ")
         view_tree(self.reduction_cell.root)
+        write_log(get_string_fr_arr(self.reduction_cell.genotype))
