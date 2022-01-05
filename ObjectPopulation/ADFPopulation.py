@@ -66,7 +66,8 @@ class ADFPopulation(BasePopulation):
             print("\tCreate no new adf")
             write_log("Create no new adf")
             return
-        num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
+        if num_of_new_adf > MIN_CHILD_ADF:
+            num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
         print("\tCreate " + str(num_of_new_adf) + " new adf")
         write_log("Create " + str(num_of_new_adf) + " new adf")
         while self.child_pop_size < num_of_new_adf:
