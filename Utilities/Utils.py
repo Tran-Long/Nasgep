@@ -272,13 +272,13 @@ def view_tree_channel(t):
         t_level = n_level
 
 def view_model_info(model_id, model):
-    print("\tModel " + model_id + " created with " + str(model.num_params) + " parameter")
+    # print("\tModel " + model_id + " created with " + str(model.num_params) + " parameter")
     write_log("Model " + model_id + " created with " + str(model.num_params) + " parameter")
-    print("\t\t", end = "")
-    print(model.normal_cell.genotype)
+    # print("\t\t", end = "")
+    # print(model.normal_cell.genotype)
     write_log(get_string_fr_arr(model.normal_cell.genotype))
-    print("\t\t", end = "")
-    print(model.reduction_cell.genotype)
+    # print("\t\t", end = "")
+    # print(model.reduction_cell.genotype)
     write_log(get_string_fr_arr(model.reduction_cell.genotype))
 
 def get_string_fr_arr(arr):

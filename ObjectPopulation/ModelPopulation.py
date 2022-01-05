@@ -29,20 +29,20 @@ class ModelPopulation:
         # self.child_population = []
 
     def reproduction(self):
-        print("\tBefore:")
+        # print("\tBefore:")
         write_log("Before: ")
-        print("\t\t", end="")
-        print(self.models_dict.keys())
+        # print("\t\t", end="")
+        # print(self.models_dict.keys())
         write_log(self.get_info_string(0))
         for (model_id, model) in self.models_dict.items():
             if not model.mark_killed:
                 self.add_model(model.normal_cell)
-        print("\tAfter:")
+        # print("\tAfter:")
         write_log("After: ")
-        print("\t\t", end="")
-        print(self.models_dict.keys(), end = " ")
+        # print("\t\t", end="")
+        # print(self.models_dict.keys(), end = " ")
         write_log(self.get_info_string(0))
-        print(self.child_models_dict.keys())
+        # print(self.child_models_dict.keys())
         write_log(self.get_info_string(1))
 
     def get_info_string(self, mode):
@@ -50,7 +50,6 @@ class ModelPopulation:
             return get_string_fr_arr(list(self.models_dict.keys()))
         else:
             return get_string_fr_arr(list(self.child_models_dict.keys()))
-
 
     """
         Used for add model to child population, input 
@@ -99,7 +98,7 @@ class ModelPopulation:
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
         model.set_fitness(correct / total * 100)
-        print((model_id + " fitness = %.2f %%") % model.fitness)
+        # print((model_id + " fitness = %.2f %%") % model.fitness)
         write_log((model_id + " fitness = %.2f %%") % model.fitness)
 
     def train_population(self, train_loader, val_loader, pop):
@@ -108,9 +107,9 @@ class ModelPopulation:
                 model.epoch_cnt += 1
                 if model.epoch_cnt == EPOCH_MAX:
                     model.mark_to_be_killed()
-                print("-----------------------------")
+                # print("-----------------------------")
                 write_log("-----------------------------")
-                print("\t\tTraining " + model_id + ".....", end = " ")
+                # print("\t\tTraining " + model_id + ".....", end = " ")
                 write_log("Training " + model_id + ".....")
                 model.training_status = True
                 for i, data in enumerate(train_loader, 0):
@@ -123,20 +122,20 @@ class ModelPopulation:
                     loss.backward()
                     model.optimizer.step()
                 model.scheduler.step()
-                print("Training " + model_id + " finished")
+                # print("Training " + model_id + " finished")
                 write_log("Training " + model_id + " finished")
                 # print("\t\tACCURACY: ", end = " ")
                 # self.test_model(train_loader, model_id, model)
-                print("\t\tVALIDATION: ", end = " ")
+                # print("\t\tVALIDATION: ", end = " ")
                 write_log("VALIDATION: ")
                 self.test_model(val_loader, model_id, model)
-                print("-------------------------------")
+                # print("-------------------------------")
                 write_log("-------------------------------")
 
     def evaluate_population_step_6(self, train_loader, test_loader, pop, t_c):
         self.train_population(train_loader, test_loader, pop)
         if t_c != -1:
-            print("\t\t Base score for another epoch = " + str(t_c))
+            # print("\t\t Base score for another epoch = " + str(t_c))
             write_log("Base score for another epoch = " + str(t_c))
             extra_models = {model_id: model for (model_id, model) in pop.items() if model.fitness >= t_c}
             self.train_population(train_loader, test_loader, extra_models)
@@ -147,10 +146,10 @@ class ModelPopulation:
 
     def survivor_selection(self):
         self.merge_dict()
-        print("\tAll model: ")
+        # print("\tAll model: ")
         write_log("All model: ")
-        print("\t\t", end = "")
-        print({model_id: (model.fitness, model.age, model.mark_killed) for (model_id, model) in self.models_dict.items()})
+        # print("\t\t", end = "")
+        # print({model_id: (model.fitness, model.age, model.mark_killed) for (model_id, model) in self.models_dict.items()})
         write_log(self.get_pop_info_string())
 
         all_id = list(self.models_dict.keys())
@@ -191,19 +190,19 @@ class ModelPopulation:
 
         model_id_to_remove.extend(all_id)
         assert len(set(model_id_to_preserve)) + len(set(model_id_to_remove)) == self.pop_size, "Wrong survivor"
-        print("\tModel to preserve: ")
+        # print("\tModel to preserve: ")
         write_log("Model to preserve: ")
-        print("\t\t", end = "")
-        print(model_id_to_preserve)
+        # print("\t\t", end = "")
+        # print(model_id_to_preserve)
         write_log(get_string_fr_arr(model_id_to_preserve))
 
         for model_id in model_id_to_remove:
             self.remove_model(model_id)
 
-        print("\tModels left: ")
+        # print("\tModels left: ")
         write_log("Models left: ")
-        print("\t\t", end = "")
-        print(self.models_dict.keys())
+        # print("\t\t", end = "")
+        # print(self.models_dict.keys())
         write_log(self.get_info_string(0))
 
     def get_pop_info_string(self):

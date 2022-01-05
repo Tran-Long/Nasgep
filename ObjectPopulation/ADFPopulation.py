@@ -63,12 +63,12 @@ class ADFPopulation(BasePopulation):
     def reproduction(self):
         num_of_new_adf = min(self.max_size - self.pop_size, MAX_CHILD_ADF)
         if num_of_new_adf < MIN_CHILD_ADF:
-            print("\tCreate no new adf")
+            # print("\tCreate no new adf")
             write_log("Create no new adf")
             return
         if num_of_new_adf > MIN_CHILD_ADF:
             num_of_new_adf = np.random.randint(MIN_CHILD_ADF, num_of_new_adf)
-        print("\tCreate " + str(num_of_new_adf) + " new adf")
+        # print("\tCreate " + str(num_of_new_adf) + " new adf")
         write_log("Create " + str(num_of_new_adf) + " new adf")
         while self.child_pop_size < num_of_new_adf:
             new_adf_genotype_1, new_adf_genotype_2 = self.reproduction_individual_genotype()
