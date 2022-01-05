@@ -53,7 +53,7 @@ model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL,
 model_pop.train_population(train_loader, val_loader, model_pop.models_dict)
 
 year = 0
-timeout = time.time() + 60*60*3
+timeout = time.time() + 60*60*24
 
 while True:
     if time.time() > timeout:
