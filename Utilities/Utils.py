@@ -296,7 +296,7 @@ def write_log(data):
     f.write(data + "\n")
     f.close()
 
-def create_file():
+def create_log_file():
     f = open(LOG_FILE, "w")
     f.close()
 

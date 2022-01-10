@@ -53,7 +53,7 @@ else:
     T_C = -1
     REMAINING_TIME = 60*60*25
     year = 0
-create_file()
+    create_log_file()
 normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, save_path = NORMAL_PATH)
 reduction_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, save_path = REDUCTION_PATH)
 reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, INIT_SIZE_CELL_POP, reduction_adf_pop, save_path = R_CELL_PATH)
