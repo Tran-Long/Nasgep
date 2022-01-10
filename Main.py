@@ -48,6 +48,9 @@ if check_file_exist(CONFIG_PATH):
     T_C = config_save_dict["t_c"]
     REMAINING_TIME = config_save_dict["remaining_time"]
     year = config_save_dict["year"]
+    write_log("==============================================")
+    write_log("DISCONNECTED FROM COLAB")
+    write_log("==============================================")
 else:
     T_G = -1
     T_C = -1
