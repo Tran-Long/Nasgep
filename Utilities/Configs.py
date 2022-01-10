@@ -8,23 +8,23 @@ CONV_TERMS = ['dep_3x3', 'dep_5x5', 'dep_3x5', 'dep_5x3', 'dep_1x7', 'dep_7x1',
               ]
 
 # CONFIG_PATH = os.path.join(os.path.dirname(os.getcwd()), "n_adf.txt")
-CONFIG_PATH = "content/drive/MyDrive/Nasgep/Nasgep/checkpoints/configs.pkl"
+CONFIG_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/configs.pkl"
 # NORMAL_PATH = os.path.join(os.path.dirname(os.getcwd()), "n_adf.txt")
-NORMAL_PATH = "content/drive/MyDrive/Nasgep/Nasgep/checkpoints/n_adf.pkl"
+NORMAL_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/n_adf.pkl"
 # REDUCTION_PATH = os.path.join(os.path.dirname(os.getcwd()), "r_adf.txt")
-REDUCTION_PATH = "content/drive/MyDrive/Nasgep/Nasgep/checkpoints/r_adf.pkl"
+REDUCTION_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/r_adf.pkl"
 # R_CELL_PATH = os.path.join(os.path.dirname(os.getcwd()), "r_cell.txt")
-R_CELL_PATH = "content/drive/MyDrive/Nasgep/Nasgep/checkpoints/r_cell.pkl"
+R_CELL_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/r_cell.pkl"
 # MODEL_PATH = os.path.join(os.path.dirname(os.getcwd()), "model.txt")
-MODEL_PATH = "content/drive/MyDrive/Nasgep/Nasgep/checkpoints/model.pkl"
+MODEL_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/model.pkl"
 # CHECKPOINT_PATH = os.path.join(os.path.dirname(os.getcwd()), "checkpoints")
-WEIGHTS_FOLDER_PATH = "content/drive/MyDrive/Nasgep/Nasgep/checkpoints/model_weights/"
+WEIGHTS_FOLDER_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/model_weights/"
 
 BEST_ACC_CONV = {conv: 0 for conv in CONV_TERMS}
 CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
 # LOG_FILE = os.path.join(os.path.dirname(os.getcwd()), "log.txt")
 """**Drive path***"""
-LOG_FILE = "content/drive/MyDrive/Nasgep/Nasgep/log.txt"
+LOG_FILE = "/content/drive/MyDrive/Nasgep/Nasgep/log.txt"
 # LOG_FILE = "/content/LOG_FILE.txt"
 
 # INIT_PARAMS = "He_normal"
