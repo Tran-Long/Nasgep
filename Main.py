@@ -42,27 +42,36 @@ classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # Step 1, 2
-T_G = -1
-T_C = -1
+if check_file_exist(CONFIG_PATH):
+    config_save_dict = load_dict_checkpoint()
+    T_G = config_save_dict["t_g"]
+    T_C = config_save_dict["t_c"]
+    REMAINING_TIME = config_save_dict["remaining_time"]
+    year = config_save_dict["year"]
+else:
+    T_G = -1
+    T_C = -1
+    REMAINING_TIME = 60*60*25
+    year = 0
 create_file()
-normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP)
-reduction_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP)
-reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, INIT_SIZE_CELL_POP, reduction_adf_pop)
-model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL, normal_adf_pop, reduction_cell_pop)
+normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, save_path = NORMAL_PATH)
+reduction_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, save_path = REDUCTION_PATH)
+reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, INIT_SIZE_CELL_POP, reduction_adf_pop, save_path = R_CELL_PATH)
+model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL, normal_adf_pop, reduction_cell_pop, save_path = MODEL_PATH)
 # Step 3
-model_pop.train_population(train_loader, val_loader, model_pop.models_dict)
+if year == 0:
+    model_pop.train_population(train_loader, val_loader, model_pop.models_dict)
 
-year = 0
-timeout = time.time() + 60*60*24
+base_time = time.time()
 
 while True:
-    if time.time() > timeout:
+    if REMAINING_TIME <= 0:
         break
     year += 1
     print("****************************")
     write_log("****************************")
-    print("*********   "+ str(year) +"  **************")
-    write_log("*********   "+ str(year) +"  **************")
+    print("*********   " + str(year) + "  **************")
+    write_log("*********   " + str(year) + "  **************")
     print("****************************")
     write_log("****************************")
     # Step 4
@@ -96,6 +105,20 @@ while True:
     print("\tUpdated T_G, T_C:\t", end = "")
     write_log("Updated T_G, T_C:")
     print("T_G = %.2f, T_C = %.2f" % (T_G, T_C))
+    REMAINING_TIME -= time.time() - base_time
+    if year % 2 == 0:
+        normal_adf_pop.save_checkpoint()
+        reduction_adf_pop.save_checkpoint()
+        reduction_cell_pop.save_checkpoint()
+        model_pop.save_checkpoint()
+        config_dict = {
+            "t_g": T_G,
+            "t_c": T_C,
+            "remaining_time": REMAINING_TIME,
+            "year": year
+        }
+        save_dict_checkpoint(config_dict, CONFIG_PATH)
+        print("==> Checkpoint saved")
 
 best_model_genotypes = model_pop.get_best_models()
 for model_genotype in best_model_genotypes:

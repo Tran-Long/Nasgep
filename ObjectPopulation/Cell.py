@@ -2,7 +2,7 @@ from ObjectPopulation.ADFPopulation import *
 from Base.BaseClass import *
 
 class Cell(BaseClass):
-    def __init__(self, adf_population, cell_head=CELL_HEAD_LEN, cell_tail=CELL_TAIL_LEN, reproduction_genotype=None):
+    def __init__(self, adf_population, cell_head=CELL_HEAD_LEN, cell_tail=CELL_TAIL_LEN, reproduction_genotype=None, from_save_path = False):
         super(Cell, self).__init__(cell_head, cell_tail)
         self.adf_population = adf_population
 
@@ -19,8 +19,9 @@ class Cell(BaseClass):
         else:
             self.genotype, self.adfs_dict = self.init_data(cell_head, cell_tail, adf_population)
 
-        for adf_id in self.adfs_dict:
-            self.adfs_dict[adf_id].is_used += 1
+        if not from_save_path:
+            for adf_id in self.adfs_dict:
+                self.adfs_dict[adf_id].is_used += 1
 
         self.root = build_tree_cell(self.genotype, self.adfs_dict)
         self.mark_killed = False
@@ -85,6 +86,4 @@ class Cell(BaseClass):
     def reproduction(self):
         new_genotype = self.reproduction_alone()
         return Cell(self.adf_population, self.head_size, self.tail_size, new_genotype)
-
-
 

@@ -2,7 +2,7 @@ from ObjectPopulation.Model import *
 
 # This population is kinda different from 2 previous populations
 class ModelPopulation:
-    def __init__(self, pop_size, n, n_adf_population, r_cell_population, for_dataset = "cifar-10"):
+    def __init__(self, pop_size, n, n_adf_population, r_cell_population, for_dataset = "cifar-10", save_path = None):
         self.nonce = 0
         self.pop_size = pop_size
         self.n = n
@@ -10,19 +10,43 @@ class ModelPopulation:
         self.r_cell_population = r_cell_population
         self.for_dataset = for_dataset
         self.models_dict = {}
-        while len(self.models_dict) < pop_size:
-            new_model = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
-            while new_model.num_params > MAX_MODEL_PARAMS:
-                reduction_cell = new_model.reduction_cell
-                normal_cell = Cell(n_adf_population)
-                new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell = reduction_cell)
-            model_id = MODEL_PREFIX + str(self.nonce)
-            self.nonce += 1
-            """"""
-            view_model_info(model_id, new_model)
-            """"""
-            self.models_dict[model_id] = new_model
-            self.models_dict[model_id].to(DEVICE)
+        self.save_path = save_path
+        if self.save_path is not None and check_file_exist(self.save_path):
+            save_dict = load_dict_checkpoint(save_path)
+            for model_id in save_dict:
+                if model_id == "nonce":
+                    self.nonce = save_dict["nonce"]
+                    continue
+                model_info = save_dict[model_id]
+                t_n_cell = Cell(n_adf_population, reproduction_genotype = model_info["normal_cell"], from_save_path = True)
+                t_n_cell.mark_killed = model_info["n_cell_mark_killed"]
+                t_n_cell.fitness = model_info["n_cell_fitness"]
+                t_r_cell = r_cell_population.cells_dict[model_info["reduction_cell"]]
+                model = Model(n_adf_population, r_cell_population, n,
+                              normal_cell = t_n_cell, reduction_cell = t_r_cell,
+                              best_cell_genotypes = model_info["model_genotype"])
+                model.reduction_cell_id = model_info["reduction_cell"]
+                model.weight_path = model_info["weight_path"]
+                model.load_checkpoint()
+                # model.to(DEVICE)
+                self.models_dict[model_id] = model
+                print("=> Load " + model_id + " successfully")
+
+        else:
+            while len(self.models_dict) < pop_size:
+                new_model = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
+                while new_model.num_params > MAX_MODEL_PARAMS:
+                    reduction_cell = new_model.reduction_cell
+                    normal_cell = Cell(n_adf_population)
+                    new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell = reduction_cell)
+                model_id = MODEL_PREFIX + str(self.nonce)
+                new_model.weight_path = make_path(model_id+"_weight.pth")
+                self.nonce += 1
+                """"""
+                view_model_info(model_id, new_model)
+                """"""
+                self.models_dict[model_id] = new_model
+                # self.models_dict[model_id].to(DEVICE)
         self.population = list(self.models_dict.values())
         self.child_models_dict = {}
         self.child_pop_size = 0
@@ -30,20 +54,20 @@ class ModelPopulation:
 
     def reproduction(self):
         # print("\tBefore:")
-        write_log("Before: ")
+        # write_log("Before: ")
         # print("\t\t", end="")
         # print(self.models_dict.keys())
-        write_log(self.get_info_string(0))
+        # write_log(self.get_info_string(0))
         for (model_id, model) in self.models_dict.items():
             if not model.mark_killed:
                 self.add_model(model.normal_cell)
         # print("\tAfter:")
-        write_log("After: ")
+        # write_log("After: ")
         # print("\t\t", end="")
         # print(self.models_dict.keys(), end = " ")
-        write_log(self.get_info_string(0))
+        # write_log(self.get_info_string(0))
         # print(self.child_models_dict.keys())
-        write_log(self.get_info_string(1))
+        # write_log(self.get_info_string(1))
 
     def get_info_string(self, mode):
         if mode == 0:
@@ -55,18 +79,20 @@ class ModelPopulation:
         Used for add model to child population, input 
     """
     def add_model(self, old_normal_cell):
-        reduction_cell = self.r_cell_population.select_random_reduction_cell()
+        reduction_cell_id, reduction_cell = self.r_cell_population.select_random_reduction_cell()
         normal_cell = old_normal_cell.reproduction()
         new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell, self.for_dataset)
+        new_model.reduction_cell_id = reduction_cell_id
         while new_model.num_params > MAX_MODEL_PARAMS:
             normal_cell = Cell(self.n_adf_population)
             new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell,  reduction_cell = reduction_cell)
         model_id = MODEL_PREFIX + str(self.nonce)
+        new_model.weight_path = make_path(model_id + "_weight.pth")
         """"""
         view_model_info(model_id, new_model)
         """"""
         self.nonce += 1
-        new_model.to(DEVICE)
+        # new_model.to(DEVICE)
         self.child_models_dict[model_id] = new_model
         # self.child_population.append(new_model)
         self.child_pop_size += 1
@@ -85,6 +111,7 @@ class ModelPopulation:
     @staticmethod
     def test_model(val_loader, model_id, model):
         model.training_status = False
+        model.eval()
         total = 0
         correct = 0
         with torch.no_grad():
@@ -112,6 +139,7 @@ class ModelPopulation:
                 # print("\t\tTraining " + model_id + ".....", end = " ")
                 write_log("Training " + model_id + ".....")
                 model.training_status = True
+                model.train()
                 for i, data in enumerate(train_loader, 0):
                     inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     # inputs, labels = data[0], data[1]
@@ -123,11 +151,11 @@ class ModelPopulation:
                     model.optimizer.step()
                 model.scheduler.step()
                 # print("Training " + model_id + " finished")
-                write_log("Training " + model_id + " finished")
+                # write_log("Training " + model_id + " finished")
                 # print("\t\tACCURACY: ", end = " ")
                 # self.test_model(train_loader, model_id, model)
                 # print("\t\tVALIDATION: ", end = " ")
-                write_log("VALIDATION: ")
+                # write_log("VALIDATION: ")
                 self.test_model(val_loader, model_id, model)
                 # print("-------------------------------")
                 write_log("-------------------------------")
@@ -191,10 +219,10 @@ class ModelPopulation:
         model_id_to_remove.extend(all_id)
         assert len(set(model_id_to_preserve)) + len(set(model_id_to_remove)) == self.pop_size, "Wrong survivor"
         # print("\tModel to preserve: ")
-        write_log("Model to preserve: ")
+        # write_log("Model to preserve: ")
         # print("\t\t", end = "")
         # print(model_id_to_preserve)
-        write_log(get_string_fr_arr(model_id_to_preserve))
+        # write_log(get_string_fr_arr(model_id_to_preserve))
 
         for model_id in model_id_to_remove:
             self.remove_model(model_id)
@@ -222,11 +250,23 @@ class ModelPopulation:
             best_model = self.models_dict[model_id]
             print("\n")
             best_model.show_info()
-            zip_model_info = []
-            normal_genotypes = []
-            for root in best_model.n_cell_roots_list:
-                normal_genotypes.append(bfs(root))
-            zip_model_info.append(normal_genotypes)
-            zip_model_info.append(bfs(best_model.r_cell_roots_list[0]))
-            best_models.append(zip_model_info)
+            best_models.append(best_model.get_info_to_save())
         return best_models
+
+    def save_checkpoint(self):
+        save_dict = {"nonce": self.nonce}
+        for model_id in self.models_dict:
+            model = self.models_dict[model_id]
+            model_dict = {"model_genotype": model.get_info_to_save(),
+                          "reduction_cell": model.reduction_cell_id,
+                          "normal_cell": model.normal_cell.genotype,
+                          "n_cell_mark_killed": model.normal_cell.mark_killed,
+                          "n_cell_fitness": model.normal_cell.fitness,
+                          "weight_path": model.weight_path,
+                          "fitness": model.fitness,
+                          "mark_killed": model.mark_killed,
+                          "epoch_cnt": model.epoch_cnt,
+                          "age": model.age}
+            model.save_checkpoint()
+            save_dict[model_id] = model_dict
+        save_dict_checkpoint(save_dict, self.save_path)

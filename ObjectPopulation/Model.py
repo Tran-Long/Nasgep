@@ -16,11 +16,12 @@ class Model(nn.Module):
         self.mark_killed = False
         self.epoch_cnt = 0
         self.age = 0
+        self.weight_path = None
         self.training_status = True
         self.drop_path_rate = DROP_PATH_RATE
         # Select cells
         if normal_cell is None and reduction_cell is None:
-            self.reduction_cell = r_cell_population.select_random_reduction_cell()
+            self.reduction_cell_id, self.reduction_cell = r_cell_population.select_random_reduction_cell()
             self.normal_cell = Cell(n_adf_population)
         else:
             self.normal_cell = normal_cell
@@ -80,6 +81,7 @@ class Model(nn.Module):
             self.all_module_block_list.append(nn.Linear(64, 10))
         # Init optimizer and loss
         self.num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        self.to(DEVICE)
         self.optimizer = torch.optim.SGD(self.parameters(), lr = LR, momentum = MOMENTUM, weight_decay = WEIGHT_DECAY)
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = 5)
         self.criterion = nn.CrossEntropyLoss()
@@ -169,3 +171,26 @@ class Model(nn.Module):
         write_log("Reduction root info: ")
         view_tree(self.reduction_cell.root)
         write_log(get_string_fr_arr(self.reduction_cell.genotype))
+
+    def get_info_to_save(self):
+        zip_model_info = []
+        normal_genotypes = []
+        for root in self.n_cell_roots_list:
+            normal_genotypes.append(bfs(root))
+        zip_model_info.append(normal_genotypes)
+        zip_model_info.append(bfs(self.r_cell_roots_list[0]))
+        return zip_model_info
+
+    def save_checkpoint(self):
+        checkpoint = {
+            "model": self.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "scheduler": self.scheduler.state_dict()
+        }
+        torch.save(checkpoint, self.weight_path)
+
+    def load_checkpoint(self):
+        checkpoint = torch.load(self.weight_path)
+        self.load_state_dict(checkpoint["model"])
+        self.optimizer.load_state_dict(checkpoint["optimizer"])
+        self.scheduler.load_state_dict(checkpoint["scheduler"])

@@ -3,22 +3,33 @@ from Base.BasePopulation import *
 from Utilities.Configs import *
 
 class ADFPopulation(BasePopulation):
-    def __init__(self, head_size, tail_size, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, extra = False):
+    def __init__(self, head_size, tail_size, for_reduction = True, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, extra = False, save_path = None):
         super(ADFPopulation, self).__init__(head_size, tail_size, pop_size)
         self.for_reduction = for_reduction
         self.adfs_dict = {}
         self.max_size = max_size
         self.extra = extra
         self.existed_genotype = []
-        while len(self.adfs_dict) < pop_size:
-            new_adf = ADF(head_size, tail_size, for_reduction)
-            if extra and new_adf.genotype in self.existed_genotype:
-                continue
-            adf_id = ADF_PREFIX + str(self.nonce)
-            self.nonce += 1
-            self.adfs_dict[adf_id] = new_adf
-            if extra:
-                self.existed_genotype.append(new_adf.genotype)
+        self.save_path = save_path
+        if save_path is not None and check_file_exist(save_path):
+            save_dict = load_dict_checkpoint(save_path)
+            for adf_id in save_dict:
+                if adf_id == "nonce":
+                    self.nonce = save_dict[adf_id]
+                    continue
+                self.adfs_dict[adf_id] = ADF(head_size, tail_size, for_reduction, reproduction_genotype = save_dict[adf_id]["genotype"])
+                self.adfs_dict[adf_id].is_used = save_dict[adf_id]["is_used"]
+                self.adfs_dict[adf_id].fitness = save_dict[adf_id]["fitness"]
+        else:
+            while len(self.adfs_dict) < pop_size:
+                new_adf = ADF(head_size, tail_size, for_reduction)
+                if extra and new_adf.genotype in self.existed_genotype:
+                    continue
+                adf_id = ADF_PREFIX + str(self.nonce)
+                self.nonce += 1
+                self.adfs_dict[adf_id] = new_adf
+                if extra:
+                    self.existed_genotype.append(new_adf.genotype)
         self.keys_list = list(self.adfs_dict.keys())
         self.population = list(self.adfs_dict.values())
         self.function_set = ADF_FUNCTION
@@ -26,18 +37,18 @@ class ADFPopulation(BasePopulation):
 
     def kill_bad_genes(self, t_g):
         if t_g != -1:
-            print("\tAdf pop consist: ")
-            write_log("Adf pop consist: ")
-            print("\t\t", end = "")
-            print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
-            write_log(self.get_info_string())
+            # print("\tAdf pop consist: ")
+            # write_log("Adf pop consist: ")
+            # print("\t\t", end = "")
+            # print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
+            # write_log(self.get_info_string())
             adf_id_to_remove = [adf_id for (adf_id, adf) in self.adfs_dict.items() if adf.fitness != -1 and adf.is_used == 0 and adf.fitness < t_g]
             for adf_id in adf_id_to_remove:
                 self.remove_adf(adf_id)
-            print("\tAdf left: ")
+            # print("\tAdf left: ")
             write_log("Adf left: ")
-            print("\t\t", end = "")
-            print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
+            # print("\t\t", end = "")
+            # print({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
             write_log(self.get_info_string())
 
     def add_adf(self, adf_genotype):
@@ -86,3 +97,12 @@ class ADFPopulation(BasePopulation):
             string += adf_id + ": (" + str(adf.fitness) + ", " + str(adf.is_used) + "; "
         string += "}"
         return string
+
+    def save_checkpoint(self):
+        save_dict = {"nonce": self.nonce}
+        for adf_id in self.adfs_dict:
+            save_dict[adf_id] = {}
+            save_dict[adf_id]["genotype"] = self.adfs_dict[adf_id].genotype
+            save_dict[adf_id]["is_used"] = self.adfs_dict[adf_id].is_used
+            save_dict[adf_id]["fitness"] = self.adfs_dict[adf_id].fitness
+        save_dict_checkpoint(save_dict, self.save_path)

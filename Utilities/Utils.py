@@ -1,3 +1,6 @@
+import os.path
+import pickle
+
 import torch.nn as nn
 import torch.nn.init
 
@@ -296,3 +299,20 @@ def write_log(data):
 def create_file():
     f = open(LOG_FILE, "w")
     f.close()
+
+def check_file_exist(file_path):
+    return os.path.exists(file_path)
+
+def save_dict_checkpoint(save_dict, path):
+    with open(path, 'wb') as fp:
+        pickle.dump(save_dict, fp)
+
+def load_dict_checkpoint(path):
+    with open(path, 'rb') as fp:
+        save_dict = pickle.load(fp)
+    return save_dict
+
+def make_path(weight_file):
+    # return os.path.join(CHECKPOINT_PATH, weight_file)
+    return WEIGHTS_FOLDER_PATH + weight_file
+
