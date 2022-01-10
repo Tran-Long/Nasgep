@@ -106,7 +106,7 @@ while True:
     T_G = min([model.fitness for (model_id, model) in model_pop.models_dict.items()])
     T_C = 0.75*T_G
     print("\tUpdated T_G, T_C:\t", end = "")
-    write_log("Updated T_G, T_C:")
+    write_log("Updated T_G = " + str(T_G) + ", T_C = " + str(T_C))
     print("T_G = %.2f, T_C = %.2f" % (T_G, T_C))
     REMAINING_TIME -= time.time() - base_time
     if year % 2 == 0:
