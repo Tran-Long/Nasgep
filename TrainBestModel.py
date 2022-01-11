@@ -52,12 +52,21 @@ model = Model(normal_adf_pop, reduction_cell_pop, best_cell_genotypes = [[n_cell
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=0.025, momentum=0.9, weight_decay = 0.0005)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max = 5)
-
-for epoch in range(300):  # loop over the dataset multiple times
+if check_file_exist(BEST_MODEL_WEIGHTS_PATH):
+    checkpoint = torch.load(BEST_MODEL_WEIGHTS_PATH)
+    epoch = checkpoint["epoch"]
+    model.load_state_dict(checkpoint["model"])
+    optimizer.load_state_dict(checkpoint["optimizer"])
+    scheduler.load_state_dict(checkpoint["scheduler"])
+else:
+    epoch = 1
+model.train()
+model.training_status = True
+while epoch <= 300:  # loop over the dataset multiple times
     running_loss = 0.0
     for i, data in enumerate(train_loader, 0):
         # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data
+        inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -80,9 +89,11 @@ print('Finished Training')
 
 correct = 0
 total = 0
+model.eval()
+model.training_status = False
 with torch.no_grad():
     for data in test_loader:
-        images, labels = data
+        images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
         # calculate outputs by running images through the network
         outputs = model(images)
         # the class with the highest energy is what we choose as prediction

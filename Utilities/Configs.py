@@ -17,8 +17,10 @@ REDUCTION_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/r_adf.pkl"
 R_CELL_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/r_cell.pkl"
 # MODEL_PATH = os.path.join(os.path.dirname(os.getcwd()), "model.txt")
 MODEL_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/model.pkl"
-# CHECKPOINT_PATH = os.path.join(os.path.dirname(os.getcwd()), "checkpoints")
+# WEIGHTS_FOLDER_PATH = os.path.join(os.path.dirname(os.getcwd()), "checkpoints/model_weights/")
 WEIGHTS_FOLDER_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/checkpoints/model_weights/"
+# BEST_MODEL_WEIGHTS_PATH = os.path.join(os.path.dirname(os.getcwd()), "best_model.pth")
+BEST_MODEL_WEIGHTS_PATH = "/content/drive/MyDrive/Nasgep/Nasgep/best_model.pth"
 
 BEST_ACC_CONV = {conv: 0 for conv in CONV_TERMS}
 CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
