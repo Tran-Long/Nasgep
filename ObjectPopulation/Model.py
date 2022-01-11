@@ -4,7 +4,7 @@ from ObjectPopulation.Cell import *
 
 class Model(nn.Module):
     def __init__(self, n_adf_population, r_cell_population, n = NUM_OF_CONSECUTIVE_NORMAL_CELL,
-                 normal_cell=None, reduction_cell=None, for_dataset=DATASET, best_cell_genotypes = None):
+                 normal_cell=None, reduction_cell_id=None, for_dataset=DATASET, best_cell_genotypes = None):
         super(Model, self).__init__()
         self.adf_population = n_adf_population  # for normal cell making
         self.cell_population = r_cell_population  # for reduction cell making
@@ -20,12 +20,13 @@ class Model(nn.Module):
         self.training_status = True
         self.drop_path_rate = DROP_PATH_RATE
         # Select cells
-        if normal_cell is None and reduction_cell is None:
+        if normal_cell is None and reduction_cell_id is None:
             self.reduction_cell_id, self.reduction_cell = r_cell_population.select_random_reduction_cell()
             self.normal_cell = Cell(n_adf_population)
         else:
             self.normal_cell = normal_cell
-            self.reduction_cell = reduction_cell
+            self.reduction_cell_id = reduction_cell_id
+            self.reduction_cell = r_cell_population.cells_dict[reduction_cell_id]
         """--------------------------------------------"""
         # print("\t\t\t", end = "")
         # print(self.normal_cell.genotype)

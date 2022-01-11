@@ -21,11 +21,9 @@ class ModelPopulation:
                 t_n_cell = Cell(n_adf_population, reproduction_genotype = model_info["normal_cell"], from_save_path = True)
                 t_n_cell.mark_killed = model_info["n_cell_mark_killed"]
                 t_n_cell.fitness = model_info["n_cell_fitness"]
-                t_r_cell = r_cell_population.cells_dict[model_info["reduction_cell"]]
                 model = Model(n_adf_population, r_cell_population, n,
-                              normal_cell = t_n_cell, reduction_cell = t_r_cell,
+                              normal_cell = t_n_cell, reduction_cell_id = model_info["reduction_cell"],
                               best_cell_genotypes = model_info["model_genotype"])
-                model.reduction_cell_id = model_info["reduction_cell"]
                 model.weight_path = model_info["weight_path"]
                 model.load_checkpoint()
                 # model.to(DEVICE)
@@ -36,9 +34,11 @@ class ModelPopulation:
             while len(self.models_dict) < pop_size:
                 new_model = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
                 while new_model.num_params > MAX_MODEL_PARAMS:
-                    reduction_cell = new_model.reduction_cell
+                    reduction_cell_id = new_model.reduction_cell_id
+                    for adf_id in normal_cell.adfs_dict:
+                        normal_cell.adfs_dict[adf_id].is_used -= 1
                     normal_cell = Cell(n_adf_population)
-                    new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell = reduction_cell)
+                    new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell_id = reduction_cell_id)
                 model_id = MODEL_PREFIX + str(self.nonce)
                 new_model.weight_path = make_path(model_id+"_weight.pth")
                 self.nonce += 1
@@ -81,11 +81,12 @@ class ModelPopulation:
     def add_model(self, old_normal_cell):
         reduction_cell_id, reduction_cell = self.r_cell_population.select_random_reduction_cell()
         normal_cell = old_normal_cell.reproduction()
-        new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell, self.for_dataset)
-        new_model.reduction_cell_id = reduction_cell_id
+        new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell_id, self.for_dataset)
         while new_model.num_params > MAX_MODEL_PARAMS:
+            for adf_id in normal_cell.adfs_dict:
+                normal_cell.adfs_dict[adf_id].is_used -= 1
             normal_cell = Cell(self.n_adf_population)
-            new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell,  reduction_cell = reduction_cell)
+            new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell, reduction_cell_id = reduction_cell_id)
         model_id = MODEL_PREFIX + str(self.nonce)
         new_model.weight_path = make_path(model_id + "_weight.pth")
         """"""
