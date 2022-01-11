@@ -316,3 +316,8 @@ def make_path(weight_file):
     # return os.path.join(CHECKPOINT_PATH, weight_file)
     return WEIGHTS_FOLDER_PATH + weight_file
 
+def clear_folder(folder_path):
+    for f in os.listdir(folder_path):
+        os.remove(os.path.join(folder_path, f))
+
+

@@ -54,7 +54,7 @@ if check_file_exist(CONFIG_PATH):
 else:
     T_G = -1
     T_C = -1
-    REMAINING_TIME = 60*60*25
+    REMAINING_TIME = 60*60*24
     year = 0
     create_log_file()
 normal_adf_pop = ADFPopulation(ADF_HEAD_LEN, ADF_TAIL_LEN, for_reduction = False, pop_size = INIT_SIZE_ADF_POP, max_size = MAX_SIZE_ADF_POP, save_path = NORMAL_PATH)
@@ -65,11 +65,11 @@ model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL,
 if year == 0:
     model_pop.train_population(train_loader, val_loader, model_pop.models_dict)
 
-base_time = time.time()
 
 while True:
     if REMAINING_TIME <= 0:
         break
+    base_time = time.time()
     year += 1
     print("****************************")
     write_log("****************************")
@@ -110,6 +110,7 @@ while True:
     print("T_G = %.2f, T_C = %.2f" % (T_G, T_C))
     REMAINING_TIME -= time.time() - base_time
     if year % 2 == 0:
+        clear_folder(WEIGHTS_FOLDER_PATH)
         normal_adf_pop.save_checkpoint()
         reduction_adf_pop.save_checkpoint()
         reduction_cell_pop.save_checkpoint()
