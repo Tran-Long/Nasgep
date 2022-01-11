@@ -285,11 +285,7 @@ def view_model_info(model_id, model):
     write_log(get_string_fr_arr(model.reduction_cell.genotype))
 
 def get_string_fr_arr(arr):
-    string = "["
-    for ele in arr:
-        string += str(ele) + ", "
-    string += "]"
-    return string
+    return str(arr)
 
 def write_log(data):
     f = open(LOG_FILE, "a")
@@ -319,5 +315,3 @@ def make_path(weight_file):
 def clear_folder(folder_path):
     for f in os.listdir(folder_path):
         os.remove(os.path.join(folder_path, f))
-
-

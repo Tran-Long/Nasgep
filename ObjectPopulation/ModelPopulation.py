@@ -1,8 +1,9 @@
 from ObjectPopulation.Model import *
 
+
 # This population is kinda different from 2 previous populations
 class ModelPopulation:
-    def __init__(self, pop_size, n, n_adf_population, r_cell_population, for_dataset = "cifar-10", save_path = None):
+    def __init__ (self, pop_size, n, n_adf_population, r_cell_population, for_dataset = "cifar-10", save_path = None):
         self.nonce = 0
         self.pop_size = pop_size
         self.n = n
@@ -18,7 +19,8 @@ class ModelPopulation:
                     self.nonce = save_dict["nonce"]
                     continue
                 model_info = save_dict[model_id]
-                t_n_cell = Cell(n_adf_population, reproduction_genotype = model_info["normal_cell"], from_save_path = True)
+                t_n_cell = Cell(n_adf_population, reproduction_genotype = model_info["normal_cell"],
+                                from_save_path = True)
                 t_n_cell.mark_killed = model_info["n_cell_mark_killed"]
                 t_n_cell.fitness = model_info["n_cell_fitness"]
                 model = Model(n_adf_population, r_cell_population, n,
@@ -38,9 +40,10 @@ class ModelPopulation:
                     for adf_id in new_model.normal_cell.adfs_dict:
                         new_model.normal_cell.adfs_dict[adf_id].is_used -= 1
                     normal_cell = Cell(n_adf_population)
-                    new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell_id = reduction_cell_id)
+                    new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell,
+                                      reduction_cell_id = reduction_cell_id)
                 model_id = MODEL_PREFIX + str(self.nonce)
-                new_model.weight_path = make_path(model_id+"_weight.pth")
+                new_model.weight_path = make_path(model_id + "_weight.pth")
                 self.nonce += 1
                 """"""
                 view_model_info(model_id, new_model)
@@ -52,7 +55,7 @@ class ModelPopulation:
         self.child_pop_size = 0
         # self.child_population = []
 
-    def reproduction(self):
+    def reproduction (self):
         # print("\tBefore:")
         # write_log("Before: ")
         # print("\t\t", end="")
@@ -69,7 +72,7 @@ class ModelPopulation:
         # print(self.child_models_dict.keys())
         # write_log(self.get_info_string(1))
 
-    def get_info_string(self, mode):
+    def get_info_string (self, mode):
         if mode == 0:
             return get_string_fr_arr(list(self.models_dict.keys()))
         else:
@@ -78,15 +81,18 @@ class ModelPopulation:
     """
         Used for add model to child population, input 
     """
-    def add_model(self, old_normal_cell):
+
+    def add_model (self, old_normal_cell):
         reduction_cell_id, reduction_cell = self.r_cell_population.select_random_reduction_cell()
         normal_cell = old_normal_cell.reproduction()
-        new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell_id, self.for_dataset)
+        new_model = Model(self.n_adf_population, self.r_cell_population, self.n, normal_cell, reduction_cell_id,
+                          self.for_dataset)
         while new_model.num_params > MAX_MODEL_PARAMS:
             for adf_id in normal_cell.adfs_dict:
                 normal_cell.adfs_dict[adf_id].is_used -= 1
             normal_cell = Cell(self.n_adf_population)
-            new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell, reduction_cell_id = reduction_cell_id)
+            new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell,
+                              reduction_cell_id = reduction_cell_id)
         model_id = MODEL_PREFIX + str(self.nonce)
         new_model.weight_path = make_path(model_id + "_weight.pth")
         """"""
@@ -98,19 +104,19 @@ class ModelPopulation:
         # self.child_population.append(new_model)
         self.child_pop_size += 1
 
-    def remove_model(self, model_id):
+    def remove_model (self, model_id):
         self.models_dict[model_id].mark_to_be_killed()
         self.models_dict.pop(model_id)
         self.pop_size -= 1
 
-    def merge_dict(self):
+    def merge_dict (self):
         self.models_dict = {**self.models_dict, **self.child_models_dict}
         self.pop_size += self.child_pop_size
         self.child_models_dict.clear()
         self.child_pop_size = 0
 
     @staticmethod
-    def test_model(val_loader, model_id, model):
+    def test_model (val_loader, model_id, model):
         model.training_status = False
         model.eval()
         total = 0
@@ -129,7 +135,7 @@ class ModelPopulation:
         # print((model_id + " fitness = %.2f %%") % model.fitness)
         write_log((model_id + " fitness = %.2f %%") % model.fitness)
 
-    def train_population(self, train_loader, val_loader, pop):
+    def train_population (self, train_loader, val_loader, pop):
         for (model_id, model) in pop.items():
             if not model.mark_killed:
                 model.epoch_cnt += 1
@@ -161,7 +167,7 @@ class ModelPopulation:
                 # print("-------------------------------")
                 write_log("-------------------------------")
 
-    def evaluate_population_step_6(self, train_loader, test_loader, pop, t_c):
+    def evaluate_population_step_6 (self, train_loader, test_loader, pop, t_c):
         self.train_population(train_loader, test_loader, pop)
         if t_c != -1:
             # print("\t\t Base score for another epoch = " + str(t_c))
@@ -169,11 +175,11 @@ class ModelPopulation:
             extra_models = {model_id: model for (model_id, model) in pop.items() if model.fitness >= t_c}
             self.train_population(train_loader, test_loader, extra_models)
 
-    def increase_age(self):
+    def increase_age (self):
         for (model_id, model) in self.models_dict.items():
             model.age += 1
 
-    def survivor_selection(self):
+    def survivor_selection (self):
         self.merge_dict()
         # print("\tAll model: ")
         write_log("All model: ")
@@ -197,7 +203,8 @@ class ModelPopulation:
             max_age = max(age_list)
             oldest_model_id = [model_id for model_id in all_id if self.models_dict[model_id].age == max_age]
             min_fitness_old = max([self.models_dict[model_id].fitness for model_id in oldest_model_id])
-            min_fitness_old_model_id = [model_id for model_id in oldest_model_id if self.models_dict[model_id].fitness == min_fitness_old]
+            min_fitness_old_model_id = [model_id for model_id in oldest_model_id if
+                                        self.models_dict[model_id].fitness == min_fitness_old]
             model_id_to_remove.extend(min_fitness_old_model_id)
             all_id = np.setdiff1d(all_id, min_fitness_old_model_id)
 
@@ -213,7 +220,8 @@ class ModelPopulation:
         else:
             num_to_preserve = len(all_id)
         temp_dict = {model_id: self.models_dict[model_id] for model_id in all_id}
-        addition_model_id_preserve = list(dict(sorted(temp_dict.items(), key = lambda x: x[1].fitness, reverse = True)[:num_to_preserve]))
+        addition_model_id_preserve = list(
+            dict(sorted(temp_dict.items(), key = lambda x: x[1].fitness, reverse = True)[:num_to_preserve]))
         model_id_to_preserve.extend(addition_model_id_preserve)
         all_id = np.setdiff1d(all_id, addition_model_id_preserve)
 
@@ -234,27 +242,34 @@ class ModelPopulation:
         # print(self.models_dict.keys())
         write_log(self.get_info_string(0))
 
-    def get_pop_info_string(self):
+    def get_pop_info_string (self):
         string = "{"
         for (model_id, model) in self.models_dict.items():
-            string += model_id + ': (' + str(model.fitness) + ", " + str(model.age) + ", " + str(model.mark_killed) + '), '
+            string += model_id + ': (' + str(model.fitness) + ", " + str(model.age) + ", " + str(
+                model.mark_killed) + '), '
         string += "}"
         return string
 
-    def get_best_models(self):
+    def get_best_models (self, show_tree = True):
         max_fitness = max([self.models_dict[model_id].fitness for model_id in list(self.models_dict.keys())])
-        max_fitness_model_id = [model_id for model_id in list(self.models_dict.keys()) if self.models_dict[model_id].fitness == max_fitness]
+        max_fitness_model_id = [model_id for model_id in list(self.models_dict.keys()) if
+                                self.models_dict[model_id].fitness == max_fitness]
         print("There are " + str(len(max_fitness_model_id)) + " best models")
         write_log("There are " + str(len(max_fitness_model_id)) + " best models")
         best_models = []
         for model_id in max_fitness_model_id:
             best_model = self.models_dict[model_id]
-            print("\n")
-            best_model.show_info()
             best_models.append(best_model.get_info_to_save())
+            print(model_id)
+            write_log(model_id)
+            if show_tree:
+                print("\n")
+                best_model.show_info()
+            else:
+                write_log(str(best_models))
         return best_models
 
-    def save_checkpoint(self):
+    def save_checkpoint (self):
         save_dict = {"nonce": self.nonce}
         for model_id in self.models_dict:
             model = self.models_dict[model_id]
