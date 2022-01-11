@@ -243,11 +243,12 @@ class ModelPopulation:
         write_log(self.get_info_string(0))
 
     def get_pop_info_string (self):
-        string = "{"
-        for (model_id, model) in self.models_dict.items():
-            string += model_id + ': (' + str(model.fitness) + ", " + str(model.age) + ", " + str(
-                model.mark_killed) + '), '
-        string += "}"
+        # string = "{"
+        # for (model_id, model) in self.models_dict.items():
+        #     string += model_id + ': (' + str(model.fitness) + ", " + str(model.age) + ", " + str(
+        #         model.mark_killed) + '), '
+        # string += "}"
+        string = str({model_id: (model.fitness, model.age, model.mark_killed) for (model_id, model) in self.models_dict.items()})
         return string
 
     def get_best_models (self, show_tree = True):

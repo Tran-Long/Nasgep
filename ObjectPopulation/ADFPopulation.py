@@ -92,10 +92,11 @@ class ADFPopulation(BasePopulation):
         self.child_pop_size = 0
 
     def get_info_string(self):
-        string = "{"
-        for (adf_id, adf) in self.adfs_dict.items():
-            string += adf_id + ": (" + str(adf.fitness) + ", " + str(adf.is_used) + "; "
-        string += "}"
+        # string = "{"
+        # for (adf_id, adf) in self.adfs_dict.items():
+        #     string += adf_id + ": (" + str(adf.fitness) + ", " + str(adf.is_used) + "; "
+        # string += "}"
+        string = str({adf_id: (adf.fitness, adf.is_used) for (adf_id, adf) in self.adfs_dict.items()})
         return string
 
     def save_checkpoint(self):

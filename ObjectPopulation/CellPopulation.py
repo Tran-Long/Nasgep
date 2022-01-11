@@ -85,10 +85,11 @@ class CellPopulation(BasePopulation):
             self.remove_cell(cell_id)
 
     def get_info_string(self):
-        string = "["
-        for cell_id in self.keys_list:
-            string += cell_id + ", "
-        string += "]"
+        # string = "["
+        # for cell_id in self.keys_list:
+        #     string += cell_id + ", "
+        # string += "]"
+        string = str(self.keys_list)
         return string
 
     def save_checkpoint(self):
