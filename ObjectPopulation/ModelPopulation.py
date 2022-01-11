@@ -35,8 +35,8 @@ class ModelPopulation:
                 new_model = Model(n_adf_population, r_cell_population, n, for_dataset = for_dataset)
                 while new_model.num_params > MAX_MODEL_PARAMS:
                     reduction_cell_id = new_model.reduction_cell_id
-                    for adf_id in normal_cell.adfs_dict:
-                        normal_cell.adfs_dict[adf_id].is_used -= 1
+                    for adf_id in new_model.normal_cell.adfs_dict:
+                        new_model.normal_cell.adfs_dict[adf_id].is_used -= 1
                     normal_cell = Cell(n_adf_population)
                     new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell, reduction_cell_id = reduction_cell_id)
                 model_id = MODEL_PREFIX + str(self.nonce)
