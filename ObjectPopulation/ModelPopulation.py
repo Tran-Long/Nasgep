@@ -117,10 +117,10 @@ class ModelPopulation:
 
     @staticmethod
     def test_model (val_loader, model_id, model):
-        model.training_status = False
-        model.eval()
         total = 0
         correct = 0
+        model.training_status = False
+        model.eval()
         with torch.no_grad():
             for data in val_loader:
                 inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
@@ -147,6 +147,7 @@ class ModelPopulation:
                 write_log("Training " + model_id + ".....")
                 model.training_status = True
                 model.train()
+                running_loss = 0.0
                 for i, data in enumerate(train_loader, 0):
                     inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     # inputs, labels = data[0], data[1]
@@ -155,6 +156,7 @@ class ModelPopulation:
                     loss = model.criterion(outputs, labels)
 
                     loss.backward()
+                    running_loss += loss.item()
                     model.optimizer.step()
                 model.scheduler.step()
                 # print("Training " + model_id + " finished")
@@ -163,6 +165,7 @@ class ModelPopulation:
                 # self.test_model(train_loader, model_id, model)
                 # print("\t\tVALIDATION: ", end = " ")
                 # write_log("VALIDATION: ")
+                write_log("LOSS: " + str(running_loss))
                 self.test_model(val_loader, model_id, model)
                 # print("-------------------------------")
                 write_log("-------------------------------")

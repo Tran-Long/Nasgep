@@ -64,9 +64,9 @@ else:
     epoch = 0
 model.train()
 model.training_status = True
+running_loss = 0.0
 while epoch < 300:  # loop over the dataset multiple times
     epoch += 1
-    running_loss = 0.0
     for i, data in enumerate(train_loader, 0):
         # get the inputs; data is a list of [inputs, labels]
         inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
@@ -82,9 +82,9 @@ while epoch < 300:  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.item()
-    if epoch % 10 == 9:    # print every 10 epochs
+    if epoch % 5 == 0:    # print every 5 epochs
         print('[%d] loss: %.3f' %
-              (epoch + 1, running_loss / 10))
+              (epoch, running_loss / 5))
         running_loss = 0.0
         checkpoint_dict = {
             "epoch": epoch,
