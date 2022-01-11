@@ -150,7 +150,7 @@ class ModelPopulation:
                 for i, data in enumerate(train_loader, 0):
                     inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     # inputs, labels = data[0], data[1]
-                    model.zero_grad()
+                    model.optimizer.zero_grad()
                     outputs = model(inputs)
                     loss = model.criterion(outputs, labels)
 
