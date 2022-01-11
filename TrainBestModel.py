@@ -1,3 +1,5 @@
+import torch
+
 from ObjectPopulation.Model import *
 from ObjectPopulation.CellPopulation import *
 import torchvision.transforms as transforms
@@ -81,11 +83,17 @@ while epoch <= 300:  # loop over the dataset multiple times
         running_loss += loss.item()
     if epoch % 10 == 9:    # print every 10 epochs
         print('[%d] loss: %.3f' %
-              (epoch + 1, running_loss / 2000))
+              (epoch + 1, running_loss / 10))
         running_loss = 0.0
+        checkpoint_dict = {
+            "epoch": epoch,
+            "model": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            "scheduler": scheduler.state_dict()
+        }
+        torch.save(checkpoint_dict, BEST_MODEL_WEIGHTS_PATH)
     scheduler.step()
 print('Finished Training')
-
 
 correct = 0
 total = 0
