@@ -103,6 +103,7 @@ while True:
     write_log("*****Step 8 - full training and update T-g, T-c*****")
     model_pop.evaluate_population_step_6(train_loader, val_loader, model_pop.models_dict, T_C)
     model_pop.increase_age()
+    model_pop.get_best_models(show_tree = False)
     T_G = min([model.fitness for (model_id, model) in model_pop.models_dict.items()])
     T_C = 0.75*T_G
     print("\tUpdated T_G, T_C:\t", end = "")
