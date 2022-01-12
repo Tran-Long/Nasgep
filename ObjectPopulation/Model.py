@@ -17,7 +17,6 @@ class Model(nn.Module):
         self.epoch_cnt = 0
         self.age = 0
         self.weight_path = None
-        self.training_status = True
         self.drop_path_rate = DROP_PATH_RATE
         # Select cells
         if normal_cell is None and reduction_cell_id is None:
@@ -84,7 +83,7 @@ class Model(nn.Module):
         self.num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         self.to(DEVICE)
         self.optimizer = torch.optim.SGD(self.parameters(), lr = LR, momentum = MOMENTUM, weight_decay = WEIGHT_DECAY)
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = 5)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max = EPOCH_MAX + 1)
         self.criterion = nn.CrossEntropyLoss()
 
     def cell_forward(self, root, prev_outputs, module_dict, nonce=0):
@@ -96,17 +95,7 @@ class Model(nn.Module):
         elif root.value == "sum":
             left_value, nonce = self.cell_forward(root.left, prev_outputs, module_dict, nonce)
             right_value, nonce = self.cell_forward(root.right, prev_outputs, module_dict, nonce)
-            if self.training_status:
-                # local drop path
-                drop_mask = [1, 1]
-                if np.random.rand() < self.drop_path_rate:
-                    drop_mask[0] = 0
-                elif np.random.rand() < self.drop_path_rate:
-                    drop_mask[1] = 0
-                output = left_value * drop_mask[0] + right_value * drop_mask[1]
-                output /= self.drop_path_rate
-            else:
-                output = left_value + right_value
+            output = left_value + right_value
         elif root.value == "cat":
             left_value, nonce = self.cell_forward(root.left, prev_outputs, module_dict, nonce)
             right_value, nonce = self.cell_forward(root.right, prev_outputs, module_dict, nonce)

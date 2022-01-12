@@ -26,18 +26,17 @@ test_transform = transforms.Compose([
 ])
 
 batch_size = BATCH_SIZE
-DEVICE = "cpu"
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
 train_dataset, _ = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
 train_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
 _, val_dataset = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
 
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+TRAIN_LOADER = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers = 4)
+VAL_LOADER = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers = 4)
 
 test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
-test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False)
+TEST_LOADER = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers = 4)
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -63,7 +62,7 @@ reduction_cell_pop = CellPopulation(CELL_HEAD_LEN, CELL_TAIL_LEN, INIT_SIZE_CELL
 model_pop = ModelPopulation(INIT_SIZE_MODEL_POP, NUM_OF_CONSECUTIVE_NORMAL_CELL, normal_adf_pop, reduction_cell_pop, save_path = MODEL_PATH)
 # Step 3
 if year == 0:
-    model_pop.train_population(train_loader, val_loader, model_pop.models_dict)
+    model_pop.train_population(TRAIN_LOADER, VAL_LOADER, model_pop.models_dict)
 
 
 while True:
@@ -92,7 +91,7 @@ while True:
     # Step 6
     print("*****Step 6 - evaluate child pop")
     write_log("*****Step 6 - evaluate child pop")
-    model_pop.evaluate_population_step_6(train_loader, val_loader, model_pop.child_models_dict, T_C)
+    model_pop.evaluate_population_step_6(TRAIN_LOADER, VAL_LOADER, model_pop.child_models_dict, T_C)
     # Step 7
     print("*****Step 7 - survivor*****")
     write_log("*****Step 7 - survivor*****")
@@ -101,7 +100,7 @@ while True:
     # STep 8
     print("*****Step 8 - full training and update T-g, T-c*****")
     write_log("*****Step 8 - full training and update T-g, T-c*****")
-    model_pop.evaluate_population_step_6(train_loader, val_loader, model_pop.models_dict, T_C)
+    model_pop.evaluate_population_step_6(TRAIN_LOADER, VAL_LOADER, model_pop.models_dict, T_C)
     model_pop.increase_age()
     model_pop.get_best_models(show_tree = False)
     T_G = min([model.fitness for (model_id, model) in model_pop.models_dict.items()])

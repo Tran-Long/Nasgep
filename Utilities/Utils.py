@@ -48,13 +48,13 @@ def conv_block (conv_term, in_channel, out_channel):
         padding_h = int((kernel_h-1)/2)
         padding_w = int((kernel_w-1)/2)
         # modules.append(nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2))
-        modules = [nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = 2)]
+        modules = [nn.Conv2d(in_channel, out_channel, kernel_size, padding = (padding_h, padding_w), stride = (2, 2))]
         if INIT_PARAMS == "He_normal":
             torch.nn.init.kaiming_normal_(modules[-1].weight)
         elif INIT_PARAMS == "He_uniform":
             torch.nn.init.kaiming_uniform_(modules[-1].weight)
     elif conv_type == "pwbr":
-        modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1), stride = int(out_channel/in_channel)))
+        modules.append(nn.Conv2d(in_channel, out_channel, kernel_size = (1, 1), stride = (int(out_channel/in_channel), int(out_channel/in_channel))))
         if INIT_PARAMS == "He_normal":
             torch.nn.init.kaiming_normal_(modules[-1].weight)
         elif INIT_PARAMS == "He_uniform":

@@ -61,9 +61,14 @@ class ModelPopulation:
         # print("\t\t", end="")
         # print(self.models_dict.keys())
         # write_log(self.get_info_string(0))
+        count = 0
         for (model_id, model) in self.models_dict.items():
             if not model.mark_killed:
+                count += 1
                 self.add_model(model.normal_cell)
+        while count < INIT_SIZE_MODEL_POP:
+            count += 1
+            self.add_model(Cell(self.n_adf_population))
         # print("\tAfter:")
         # write_log("After: ")
         # print("\t\t", end="")
@@ -119,7 +124,6 @@ class ModelPopulation:
     def test_model (val_loader, model_id, model):
         total = 0
         correct = 0
-        model.training_status = False
         model.eval()
         with torch.no_grad():
             for data in val_loader:
@@ -145,7 +149,6 @@ class ModelPopulation:
                 write_log("-----------------------------")
                 # print("\t\tTraining " + model_id + ".....", end = " ")
                 write_log("Training " + model_id + ".....")
-                model.training_status = True
                 model.train()
                 running_loss = 0.0
                 for data in train_loader:
@@ -154,11 +157,10 @@ class ModelPopulation:
                     model.optimizer.zero_grad()
                     outputs = model(inputs)
                     loss = model.criterion(outputs, labels)
-
                     loss.backward()
                     running_loss += loss.item()
                     model.optimizer.step()
-                model.scheduler.step()
+                    model.scheduler.step()
                 # print("Training " + model_id + " finished")
                 # write_log("Training " + model_id + " finished")
                 # print("\t\tACCURACY: ", end = " ")

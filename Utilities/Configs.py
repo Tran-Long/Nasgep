@@ -29,8 +29,8 @@ CONV_BEST_PARAMS_LINKS = {conv: conv + ".pkl" for conv in CONV_TERMS}
 LOG_FILE = "/content/drive/MyDrive/Nasgep/Nasgep/log.txt"
 # LOG_FILE = "/content/LOG_FILE.txt"
 
-# INIT_PARAMS = "He_normal"
-INIT_PARAMS = "He_uniform"
+INIT_PARAMS = "He_normal"
+# INIT_PARAMS = "He_uniform"
 
 """LEARNING RATE & REGULARIZATION"""
 DROP_PATH_RATE = 0.1
