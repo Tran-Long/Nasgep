@@ -43,7 +43,7 @@ classes = ('plane', 'car', 'bird', 'cat',
 
 # Step 1, 2
 if check_file_exist(CONFIG_PATH):
-    config_save_dict = load_dict_checkpoint()
+    config_save_dict = load_dict_checkpoint(CONFIG_PATH)
     T_G = config_save_dict["t_g"]
     T_C = config_save_dict["t_c"]
     REMAINING_TIME = config_save_dict["remaining_time"]

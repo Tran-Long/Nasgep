@@ -84,6 +84,11 @@ class CellPopulation(BasePopulation):
         for cell_id in cell_id_to_kill:
             self.remove_cell(cell_id)
 
+        assert len(self.population) == len(self.keys_list) and len(self.keys_list) == len(self.cells_dict.keys())
+        for cell_id in self.keys_list:
+            assert cell_id in self.cells_dict
+        write_log("Cells left: " + str(self.keys_list))
+
     def get_info_string(self):
         # string = "["
         # for cell_id in self.keys_list:

@@ -229,7 +229,7 @@ class ModelPopulation:
         all_id = np.setdiff1d(all_id, addition_model_id_preserve)
 
         model_id_to_remove.extend(all_id)
-        assert len(set(model_id_to_preserve)) + len(set(model_id_to_remove)) == self.pop_size, "Wrong survivor"
+        # assert len(set(model_id_to_preserve)) + len(set(model_id_to_remove)) == self.pop_size, "Wrong survivor"
         # print("\tModel to preserve: ")
         # write_log("Model to preserve: ")
         # print("\t\t", end = "")

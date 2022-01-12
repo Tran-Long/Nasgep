@@ -160,6 +160,7 @@ class Model(nn.Module):
         self.mark_killed = True
         self.normal_cell.mark_to_be_killed()
         self.reduction_cell.mark_to_be_killed()
+        write_log("Remove cell:" + str(self.reduction_cell_id))
 
     def show_info(self):
         print("\t\tModel info: ")
