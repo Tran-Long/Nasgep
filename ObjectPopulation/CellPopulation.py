@@ -68,7 +68,7 @@ class CellPopulation(BasePopulation):
         # print("\t\t", end = "")
         # print(self.keys_list)
         # write_log(self.get_info_string())
-        while self.child_pop_size < self.pop_size:
+        while self.child_pop_size < INIT_SIZE_CELL_POP:
             new_cell_genotype1, new_cell_genotype2 = self.reproduction_individual_genotype()
             self.add_cell(new_cell_genotype1)
             self.add_cell(new_cell_genotype2)

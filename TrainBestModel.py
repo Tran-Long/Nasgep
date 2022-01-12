@@ -12,7 +12,7 @@ normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]]
                                  std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
 
 train_transform = transforms.Compose([
-    transforms.RandomCrop(size=32, padding=4),
+    transforms.RandomCrop(size=32, padding=4, fill = 128),
     transforms.RandomHorizontalFlip(),
     CIFAR10Policy(),
     transforms.ToTensor(),
@@ -25,7 +25,7 @@ test_transform = transforms.Compose([
     normalize
 ])
 
-batch_size = 128
+batch_size = 4
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True)
@@ -82,6 +82,7 @@ while epoch < 300:  # loop over the dataset multiple times
 
         # print statistics
         running_loss += loss.item()
+    scheduler.step()
     if epoch % 5 == 0:    # print every 5 epochs
         print('[%d] loss: %.3f' %
               (epoch, running_loss / 5))
@@ -93,7 +94,21 @@ while epoch < 300:  # loop over the dataset multiple times
             "scheduler": scheduler.state_dict()
         }
         torch.save(checkpoint_dict, BEST_MODEL_WEIGHTS_PATH)
-    scheduler.step()
+    if epoch % 50 == 49:
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in test_loader:
+                inputs, labels = data[0].to("cuda:0"), data[1].to("cuda:0")
+                # calculate outputs by running images through the network
+                outputs = model(inputs)
+                # the class with the highest energy is what we choose as prediction
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        print('Accuracy of the network on the 10000 test images: %d %%' % (
+                100 * correct / total))
 print('Finished Training')
 
 correct = 0

@@ -43,7 +43,7 @@ class ModelPopulation:
                     new_model = Model(n_adf_population, r_cell_population, normal_cell = normal_cell,
                                       reduction_cell_id = reduction_cell_id)
                 model_id = MODEL_PREFIX + str(self.nonce)
-                new_model.weight_path = make_path(model_id + "_weight.pth")
+                new_model.weight_path = make_path(model_id + "_weight.pth.tar")
                 self.nonce += 1
                 """"""
                 view_model_info(model_id, new_model)
@@ -94,7 +94,7 @@ class ModelPopulation:
             new_model = Model(self.n_adf_population, self.r_cell_population, normal_cell = normal_cell,
                               reduction_cell_id = reduction_cell_id)
         model_id = MODEL_PREFIX + str(self.nonce)
-        new_model.weight_path = make_path(model_id + "_weight.pth")
+        new_model.weight_path = make_path(model_id + "_weight.pth.tar")
         """"""
         view_model_info(model_id, new_model)
         """"""
@@ -148,7 +148,7 @@ class ModelPopulation:
                 model.training_status = True
                 model.train()
                 running_loss = 0.0
-                for i, data in enumerate(train_loader, 0):
+                for data in train_loader:
                     inputs, labels = data[0].to(DEVICE), data[1].to(DEVICE)
                     # inputs, labels = data[0], data[1]
                     model.optimizer.zero_grad()

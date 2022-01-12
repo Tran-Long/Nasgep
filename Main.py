@@ -12,7 +12,7 @@ normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]]
                                  std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
 
 train_transform = transforms.Compose([
-    transforms.RandomCrop(size=32, padding=4),
+    transforms.RandomCrop(size=32, padding=4, fill = 128),
     transforms.RandomHorizontalFlip(),
     CIFAR10Policy(),
     transforms.ToTensor(),
@@ -30,7 +30,7 @@ DEVICE = "cpu"
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
 train_dataset, _ = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
-train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=test_transform)
+train_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
 _, val_dataset = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
