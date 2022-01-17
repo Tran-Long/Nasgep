@@ -117,7 +117,7 @@ while True:
     write_log("Updated T_G = " + str(T_G) + ", T_C = " + str(T_C))
     print("T_G = %.2f, T_C = %.2f" % (T_G, T_C))
     REMAINING_TIME -= time.time() - base_time
-    if year % 2 == 0:
+    if year % 5 == 0:
         clear_folder(WEIGHTS_FOLDER_PATH)
         normal_adf_pop.save_checkpoint()
         reduction_adf_pop.save_checkpoint()
