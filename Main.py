@@ -1,3 +1,4 @@
+import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision
 from ObjectPopulation.CellPopulation import *
@@ -7,6 +8,7 @@ from Utilities.Configs import *
 from DataPreprocessing.Cutout import *
 from DataPreprocessing.AutoAugment import *
 import time
+from sklearn.model_selection import StratifiedKFold
 
 normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                  std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
@@ -28,15 +30,21 @@ test_transform = transforms.Compose([
 batch_size = BATCH_SIZE
 
 train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=train_transform)
-train_dataset, _ = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
-train_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=test_transform)
-_, val_dataset = torch.utils.data.random_split(train_set, [45000, 5000], generator=torch.Generator().manual_seed(37))
+valid_set = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=test_transform)
+sk2 = StratifiedKFold(n_splits = 10, shuffle = True, random_state = 3737)
+train_idx, valid_idx = None, None
+for t, v in sk2.split(train_set.data, train_set.targets):
+    train_idx = t
+    valid_idx = v
+    break
+train_dataset = torch.utils.data.Subset(train_set, train_idx)
+val_dataset = torch.utils.data.Subset(valid_set, valid_idx)
 
-TRAIN_LOADER = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers = 4)
-VAL_LOADER = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers = 4)
+TRAIN_LOADER = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle = True, num_workers = 4)
+VAL_LOADER = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle = False, num_workers = 4)
 
-test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
-TEST_LOADER = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers = 4)
+# test_set = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=test_transform)
+# TEST_LOADER = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers = 4)
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
