@@ -22,7 +22,7 @@ class Model(nn.Module):
         if normal_cell is None and reduction_cell_id is None:
             self.reduction_cell_id, self.reduction_cell = r_cell_population.select_random_reduction_cell()
             self.normal_cell = Cell(n_adf_population)
-        else:
+        elif normal_cell is not None and reduction_cell_id is not None:
             self.normal_cell = normal_cell
             self.reduction_cell_id = reduction_cell_id
             self.reduction_cell = r_cell_population.cells_dict[reduction_cell_id]
