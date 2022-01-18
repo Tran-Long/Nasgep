@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.nn.functional as F
 from ObjectPopulation.Cell import *
@@ -26,12 +28,9 @@ class Model(nn.Module):
             self.normal_cell = normal_cell
             self.reduction_cell_id = reduction_cell_id
             if reduction_cell_id in r_cell_population.cells_dict:
-                assert best_cell_genotypes is not None
                 self.reduction_cell = r_cell_population.cells_dict[reduction_cell_id]
-        # else:
-        #     self.normal_cell = normal_cell
-        #     self.reduction_cell_id = "cell-1"
-        #     self.reduction_cell = Cell(n_adf_population, from_save_path = True)
+            else:
+                self.reduction_cell = copy.deepcopy(normal_cell)  # bừa bất kì cell nào cũng đc, không quan trọng lắm
         """--------------------------------------------"""
         # print("\t\t\t", end = "")
         # print(self.normal_cell.genotype)
@@ -47,8 +46,8 @@ class Model(nn.Module):
                 self.n_cell_roots_list.append(build_tree(normal_cell_genotypes[i]))
             reduction_cell_genotype = best_cell_genotypes[1]
             self.r_cell_roots_list.append(build_tree(reduction_cell_genotype))
-            # self.normal_cell.root = self.n_cell_roots_list[0]
-            # self.reduction_cell.root = self.r_cell_roots_list[0]
+            self.normal_cell.root = self.n_cell_roots_list[0]
+            self.reduction_cell.root = self.r_cell_roots_list[0]
 
         # Init network representation
         current_input_channel = 3
