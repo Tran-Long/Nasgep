@@ -23,14 +23,9 @@ class ModelPopulation:
                                 from_save_path = True)
                 t_n_cell.mark_killed = model_info["n_cell_mark_killed"]
                 t_n_cell.fitness = model_info["n_cell_fitness"]
-                if model_info["mark_killed"]:
-                    model = Model(n_adf_population, r_cell_population, n,
-                                  normal_cell = t_n_cell, reduction_cell_id = None,
-                                  best_cell_genotypes = model_info["model_genotype"])
-                else:
-                    model = Model(n_adf_population, r_cell_population, n,
-                                  normal_cell = t_n_cell, reduction_cell_id = model_info["reduction_cell"],
-                                  best_cell_genotypes = model_info["model_genotype"])
+                model = Model(n_adf_population, r_cell_population, n,
+                              normal_cell = t_n_cell, reduction_cell_id = model_info["reduction_cell"],
+                              best_cell_genotypes = model_info["model_genotype"])
                 model.weight_path = model_info["weight_path"]
                 model.age = model_info["age"]
                 model.mark_killed = model_info["mark_killed"]

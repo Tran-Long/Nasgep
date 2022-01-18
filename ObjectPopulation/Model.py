@@ -22,10 +22,16 @@ class Model(nn.Module):
         if normal_cell is None and reduction_cell_id is None:
             self.reduction_cell_id, self.reduction_cell = r_cell_population.select_random_reduction_cell()
             self.normal_cell = Cell(n_adf_population)
-        elif normal_cell is not None and reduction_cell_id is not None:
+        else:
             self.normal_cell = normal_cell
             self.reduction_cell_id = reduction_cell_id
-            self.reduction_cell = r_cell_population.cells_dict[reduction_cell_id]
+            if reduction_cell_id in r_cell_population.cells_dict:
+                assert best_cell_genotypes is not None
+                self.reduction_cell = r_cell_population.cells_dict[reduction_cell_id]
+        # else:
+        #     self.normal_cell = normal_cell
+        #     self.reduction_cell_id = "cell-1"
+        #     self.reduction_cell = Cell(n_adf_population, from_save_path = True)
         """--------------------------------------------"""
         # print("\t\t\t", end = "")
         # print(self.normal_cell.genotype)
@@ -41,8 +47,8 @@ class Model(nn.Module):
                 self.n_cell_roots_list.append(build_tree(normal_cell_genotypes[i]))
             reduction_cell_genotype = best_cell_genotypes[1]
             self.r_cell_roots_list.append(build_tree(reduction_cell_genotype))
-            self.normal_cell.root = self.n_cell_roots_list[0]
-            self.reduction_cell.root = self.r_cell_roots_list[0]
+            # self.normal_cell.root = self.n_cell_roots_list[0]
+            # self.reduction_cell.root = self.r_cell_roots_list[0]
 
         # Init network representation
         current_input_channel = 3
