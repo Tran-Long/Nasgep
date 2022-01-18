@@ -19,15 +19,15 @@ class ModelPopulation:
                     self.nonce = save_dict["nonce"]
                     continue
                 model_info = save_dict[model_id]
+                t_n_cell = Cell(n_adf_population, reproduction_genotype = model_info["normal_cell"],
+                                from_save_path = True)
+                t_n_cell.mark_killed = model_info["n_cell_mark_killed"]
+                t_n_cell.fitness = model_info["n_cell_fitness"]
                 if model_info["mark_killed"]:
                     model = Model(n_adf_population, r_cell_population, n,
                                   normal_cell = t_n_cell, reduction_cell_id = None,
                                   best_cell_genotypes = model_info["model_genotype"])
                 else:
-                    t_n_cell = Cell(n_adf_population, reproduction_genotype = model_info["normal_cell"],
-                                    from_save_path = True)
-                    t_n_cell.mark_killed = model_info["n_cell_mark_killed"]
-                    t_n_cell.fitness = model_info["n_cell_fitness"]
                     model = Model(n_adf_population, r_cell_population, n,
                                   normal_cell = t_n_cell, reduction_cell_id = model_info["reduction_cell"],
                                   best_cell_genotypes = model_info["model_genotype"])
