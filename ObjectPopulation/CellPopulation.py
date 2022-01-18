@@ -28,6 +28,7 @@ class CellPopulation(BasePopulation):
                 self.nonce += 1
                 self.cells_dict[cell_id] = new_cell
         self.keys_list = list(self.cells_dict.keys())
+        self.pop_size = len(self.keys_list)
         self.population = list(self.cells_dict.values())
         self.adf_population = r_adf_population
         self.function_set = CELL_FUNCTION

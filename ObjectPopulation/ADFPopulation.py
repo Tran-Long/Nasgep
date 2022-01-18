@@ -31,6 +31,7 @@ class ADFPopulation(BasePopulation):
                 if extra:
                     self.existed_genotype.append(new_adf.genotype)
         self.keys_list = list(self.adfs_dict.keys())
+        self.pop_size = len(self.keys_list)
         self.population = list(self.adfs_dict.values())
         self.function_set = ADF_FUNCTION
         self.terminal_set = ADF_TERMINAL
