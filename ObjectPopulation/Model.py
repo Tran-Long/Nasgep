@@ -54,7 +54,7 @@ class Model(nn.Module):
         prev_outputs = []
         if for_dataset == "cifar-10":
             self.all_module_block_list.append(nn.ModuleList([conv_block(STEM_TERM, current_input_channel, NUM_CHANNELS)]))
-            current_input_channel = 16
+            current_input_channel = NUM_CHANNELS
             prev_outputs.append(0)
 
             # 1st normal block => channel = 16
@@ -83,7 +83,7 @@ class Model(nn.Module):
                     self.all_cell_file_list.append(path_dict)
                     prev_outputs.append(0)
             self.all_module_block_list.append(nn.BatchNorm2d(current_input_channel))
-            self.all_module_block_list.append(nn.Linear(64, 10))
+            self.all_module_block_list.append(nn.Linear(NUM_CHANNELS * (self.n + 1), 10))
         # Init optimizer and loss
         self.num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         self.to(DEVICE)
